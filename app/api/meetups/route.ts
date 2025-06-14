@@ -15,9 +15,17 @@ export async function POST(request: NextRequest) {
       code,
       participants: [],
       costs: [],
+      itemSuggestions: [],
+      dateAvailabilities: [],
       createdAt: new Date(),
       date: new Date(data.date),
       endDate: data.endDate ? new Date(data.endDate) : null,
+      possibleDates: data.possibleDates
+        ? data.possibleDates.map((d: any) => ({
+            ...d,
+            date: new Date(d.date),
+          }))
+        : [],
     }
 
     // Add the document to Firestore

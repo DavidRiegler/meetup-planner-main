@@ -25,6 +25,10 @@ import {
 import { Modal } from "./modal"
 import { ParticipantEditModal } from "./participant-edit-modal"
 import { UserX, Edit3 } from "lucide-react"
+import { DatePoll } from "./date-poll"
+import { ItemSuggestionForm } from "./item-suggestion-form"
+import { ItemSuggestionsList } from "./item-suggestions-list"
+import { DateAvailabilityForm } from "./date-availability-form"
 
 interface MeetupDetailsProps {
   meetupId: string
@@ -46,15 +50,6 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
   const [actionLoading, setActionLoading] = useState(false)
   const [showEditParticipation, setShowEditParticipation] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const handleCopyCode = async () => {
-    if (meetup?.code) {
-      await navigator.clipboard.writeText(meetup.code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    }
-  }
 
   const [newCost, setNewCost] = useState({
     items: [{ name: "", amount: 0, sharedWith: [] as string[] }],
@@ -125,6 +120,9 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
         participants: Array.isArray(data.participants) ? data.participants : [],
         costs: Array.isArray(data.costs) ? data.costs : [],
         createdAt: new Date(data.createdAt),
+        possibleDates: Array.isArray(data.possibleDates) ? data.possibleDates : [],
+        dateAvailabilities: Array.isArray(data.dateAvailabilities) ? data.dateAvailabilities : [],
+        itemSuggestions: Array.isArray(data.itemSuggestions) ? data.itemSuggestions : [],
       }
 
       setMeetup(meetupData)
@@ -462,17 +460,15 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
   return (
     <ErrorBoundary>
       <div className="container">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={onBack} className="button button-outline">
-            <ArrowLeft size={16} />
-            Back
-          </button>
-          <h1 className="text-2xl font-bold">{meetup.title}</h1>
-          <span className="badge badge-primary">{meetup.code}</span>
-          <button onClick={handleCopyCode} className="button button-secondary button-sm">
-            {copied ? "Kopiert!" : "Code kopieren"}
-          </button>
-        </div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button onClick={onBack} className="button button-outline">
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            <h1 className="text-2xl font-bold">{meetup.title}</h1>
+            <span className="badge badge-primary">{meetup.code}</span>
+          </div>
 
           <div className="flex items-center gap-2">
             {isHost && (
@@ -551,6 +547,47 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
             )}
           </div>
 
+          {/* Date Poll Section */}
+          {meetup.possibleDates && meetup.possibleDates.length > 0 && (
+            <div className="card">
+              <DatePoll
+                possibleDates={meetup.possibleDates}
+                dateAvailabilities={meetup.dateAvailabilities || []}
+                isHost={isHost}
+                showResults={true}
+              />
+
+              {/* Allow participants to update their availability */}
+              {currentParticipant && !isHost && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <DateAvailabilityForm
+                    meetupId={meetup.id}
+                    possibleDates={meetup.possibleDates}
+                    existingAvailabilities={meetup.dateAvailabilities || []}
+                    onUpdate={fetchMeetupDetails}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Item Suggestions Section */}
+          <div className="card">
+            <ItemSuggestionsList
+              meetupId={meetup.id}
+              suggestions={meetup.itemSuggestions || []}
+              isHost={isHost}
+              onUpdate={fetchMeetupDetails}
+            />
+
+            {/* Allow participants to suggest items */}
+            {!isHost && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <ItemSuggestionForm meetupId={meetup.id} onSuggestionAdded={fetchMeetupDetails} />
+              </div>
+            )}
+          </div>
+
           {/* Shopping List */}
           <div className="card">
             <h3 className="text-lg font-semibold mb-4">🛒 {t("shoppingList")}</h3>
@@ -595,11 +632,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <strong>
-                          {participant.fullName
-                            ? participant.fullName
-                            : `@${participant.username}`}
-                        </strong>
+                        <strong>@{participant.username}</strong>
                         {isHost && (
                           <button
                             onClick={() => setParticipantToRemove(participant)}
@@ -785,7 +818,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
                 <input
                   type="date"
                   value={editForm.endDate || ""}
-                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
+                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value || "" })}
                   className="input"
                   min={editForm.date}
                 />
@@ -857,6 +890,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
           type="warning"
           loading={actionLoading}
         />
+      </div>
     </ErrorBoundary>
   )
 }

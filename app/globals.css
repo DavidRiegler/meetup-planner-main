@@ -1533,3 +1533,575 @@ body {
 [data-theme="dark"] .auth-card {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2);
 }
+
+/* Date Poll Styles */
+.date-poll {
+  background: var(--muted);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.date-poll-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.date-poll-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.date-poll-summary {
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.date-poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.date-poll-option {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.date-poll-winner {
+  border-color: var(--success);
+  background: rgba(56, 161, 105, 0.05);
+}
+
+.date-poll-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.date-poll-option-info {
+  flex: 1;
+}
+
+.date-poll-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.date-poll-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin-bottom: 4px;
+}
+
+.date-poll-description {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.date-poll-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-poll-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.date-poll-winner-badge {
+  font-size: 18px;
+}
+
+.date-poll-bar {
+  position: relative;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.date-poll-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--success) 0%, var(--primary) 100%);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.date-poll-percentage {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.date-poll-participants {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-poll-participant-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-poll-participant-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.date-poll-participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.date-poll-participant {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.date-poll-participant.available {
+  background: rgba(56, 161, 105, 0.1);
+  color: var(--success);
+}
+
+.date-poll-participant.unavailable {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--destructive);
+}
+
+/* Date Availability Form */
+.date-availability-form {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.date-availability-header {
+  margin-bottom: 20px;
+}
+
+.date-availability-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.date-availability-subtitle {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.date-availability-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.date-availability-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+}
+
+.date-availability-option-info {
+  flex: 1;
+}
+
+.date-availability-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.date-availability-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin-bottom: 4px;
+}
+
+.date-availability-description {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.date-availability-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.date-availability-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-availability-btn:hover {
+  background: var(--secondary);
+}
+
+.date-availability-btn.active.available {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+
+.date-availability-btn.active.unavailable {
+  border-color: var(--destructive);
+  background: var(--destructive);
+  color: white;
+}
+
+.date-availability-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Item Suggestions */
+.item-suggestion-trigger {
+  margin-bottom: 20px;
+}
+
+.item-suggestion-form {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.item-suggestion-header {
+  margin-bottom: 20px;
+}
+
+.item-suggestion-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.item-suggestion-subtitle {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.item-suggestion-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item-suggestion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.item-suggestion-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.item-suggestions-list {
+  margin-bottom: 20px;
+}
+
+.item-suggestions-header {
+  margin-bottom: 16px;
+}
+
+.item-suggestions-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.item-suggestions-subtitle {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.item-suggestions-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-suggestion-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.item-suggestion-card:hover {
+  background: var(--secondary);
+}
+
+.item-suggestion-info {
+  flex: 1;
+}
+
+.item-suggestion-main {
+  margin-bottom: 8px;
+}
+
+.item-suggestion-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.item-suggestion-details {
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.item-suggestion-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.item-suggestion-category {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.item-suggestion-author {
+  font-weight: 500;
+}
+
+.item-suggestion-time {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.item-suggestion-reason {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  background: var(--card);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.item-suggestion-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Date Options in Create Form */
+.date-options-section {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--muted);
+}
+
+.date-option-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .date-poll-option-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .date-poll-stats {
+    align-self: flex-end;
+  }
+
+  .date-availability-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .date-availability-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .date-availability-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .item-suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-suggestion-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .item-suggestion-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .item-suggestion-actions .button {
+    flex: 1;
+  }
+
+  .date-poll-participants {
+    margin-top: 8px;
+  }
+
+  .date-poll-participant-list {
+    justify-content: flex-start;
+  }
+}
+
+/* Tablet Responsiveness */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .item-suggestion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .date-availability-controls {
+    flex-direction: column;
+    width: 120px;
+  }
+
+  .date-availability-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Enhanced Mobile Navigation */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .button-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .date-poll-title,
+  .date-availability-title,
+  .item-suggestion-title,
+  .item-suggestions-title {
+    font-size: 16px;
+  }
+
+  .date-poll-date,
+  .date-availability-date {
+    font-size: 14px;
+  }
+
+  .item-suggestion-actions {
+    flex-direction: column;
+  }
+
+  .date-availability-footer {
+    justify-content: stretch;
+  }
+
+  .date-availability-footer .button {
+    width: 100%;
+  }
+}

@@ -12,13 +12,16 @@ export interface Meetup {
   location: string
   date: Date
   time: string
-  endDate?: Date // Added for multi-day support
-  endTime?: string // Added for multi-day support
+  endDate?: Date
+  endTime?: string
+  possibleDates?: MeetupDate[] // New field for multiple date options
+  dateAvailabilities?: DateAvailability[] // New field for participant availability
   hostId: string
   hostUsername: string
   code: string
   hasAlcohol: boolean
   shoppingList: ShoppingItem[]
+  itemSuggestions?: ItemSuggestion[] // New field for item suggestions
   participants: Participant[]
   costs: Cost[]
   createdAt: Date
@@ -35,13 +38,12 @@ export interface ShoppingItem {
 
 export interface Participant {
   id: string
-  participantId: string
+  participantId: string // This was missing - it's the user ID who joined
   username: string
-  fullName?: string // <--- Hinzugefügt
   isVegetarian: boolean
   isVegan: boolean
   drinksAlcohol: boolean
-  stayDuration: number
+  stayDuration: number // in hours
   joinTime: string
   suggestions: string
   bringingItems: string[]
@@ -76,11 +78,14 @@ export interface FirebaseMeetup {
   time: string
   endDate?: any // Firebase Timestamp or Date
   endTime?: string
+  possibleDates?: MeetupDate[]
+  dateAvailabilities?: DateAvailability[]
   hostId: string
   hostUsername: string
   code: string
   hasAlcohol: boolean
   shoppingList?: ShoppingItem[]
+  itemSuggestions?: ItemSuggestion[]
   participants?: Participant[]
   costs?: Cost[]
   createdAt: any // Firebase Timestamp or Date
@@ -89,3 +94,31 @@ export interface FirebaseMeetup {
 
 // Add a helper type for meetup status
 export type MeetupStatus = "upcoming" | "inProgress" | "past"
+
+export interface MeetupDate {
+  id: string
+  date: Date
+  time: string
+  endTime?: string
+  description?: string
+}
+
+export interface DateAvailability {
+  participantId: string
+  username: string
+  dateId: string
+  available: boolean
+}
+
+export interface ItemSuggestion {
+  id: string
+  participantId: string
+  participantUsername: string
+  name: string
+  baseAmount: number
+  unit: string
+  category: "food" | "drink" | "alcohol" | "other"
+  perPerson: boolean
+  reason?: string
+  suggestedAt: Date
+}

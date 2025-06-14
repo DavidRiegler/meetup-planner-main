@@ -28,11 +28,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       time: data.time || "",
       endDate: data.endDate?.toDate ? data.endDate.toDate() : data.endDate ? new Date(data.endDate) : undefined,
       endTime: data.endTime || undefined,
+      possibleDates: data.possibleDates
+        ? data.possibleDates.map((d: any) => ({
+            ...d,
+            date: d.date?.toDate ? d.date.toDate() : new Date(d.date),
+          }))
+        : undefined,
+      dateAvailabilities: data.dateAvailabilities || [],
       hostId: data.hostId || "",
       hostUsername: data.hostUsername || "",
       code: data.code || "",
       hasAlcohol: data.hasAlcohol || false,
       shoppingList: data.shoppingList || [],
+      itemSuggestions: data.itemSuggestions || [],
       participants: data.participants || [],
       costs: data.costs || [],
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),

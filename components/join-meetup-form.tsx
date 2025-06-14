@@ -6,6 +6,7 @@ import { useIntl } from "./intl-provider"
 import { useToast } from "./toast"
 import { formatLocationDisplay } from "@/lib/maps-utils"
 import { AlertCircle, ExternalLink, MapPin } from "lucide-react"
+import { DateAvailabilityForm } from "./date-availability-form"
 
 interface JoinMeetupFormProps {
   onBack: () => void
@@ -208,6 +209,16 @@ export function JoinMeetupForm({ onBack }: JoinMeetupFormProps) {
               )}
             </div>
           </div>
+
+          {/* Date Availability Selection */}
+          {meetup.possibleDates && meetup.possibleDates.length > 0 && (
+            <DateAvailabilityForm
+              meetupId={meetup.id}
+              possibleDates={meetup.possibleDates}
+              existingAvailabilities={meetup.dateAvailabilities || []}
+              onUpdate={() => {}} // Will be handled in join process
+            />
+          )}
 
           <div>
             <h4 className="text-lg font-semibold mb-4">Your Preferences</h4>
