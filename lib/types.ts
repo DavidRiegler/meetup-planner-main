@@ -14,14 +14,19 @@ export interface Meetup {
   time: string
   endDate?: Date
   endTime?: string
-  possibleDates?: MeetupDate[] // New field for multiple date options
-  dateAvailabilities?: DateAvailability[] // New field for participant availability
+  possibleDates?: MeetupDate[]
+  dateAvailabilities?: DateAvailability[]
+  dateFinalized?: boolean
+  finalizedAt?: Date
+  winningDateVotes?: number
+  winningDateVoters?: string[]
+  usesDatePolling?: boolean // New field to track if this meetup uses date polling
   hostId: string
   hostUsername: string
   code: string
   hasAlcohol: boolean
   shoppingList: ShoppingItem[]
-  itemSuggestions?: ItemSuggestion[] // New field for item suggestions
+  itemSuggestions?: ItemSuggestion[]
   participants: Participant[]
   costs: Cost[]
   createdAt: Date
@@ -80,6 +85,11 @@ export interface FirebaseMeetup {
   endTime?: string
   possibleDates?: MeetupDate[]
   dateAvailabilities?: DateAvailability[]
+  dateFinalized?: boolean
+  finalizedAt?: any // Firebase Timestamp or Date
+  winningDateVotes?: number
+  winningDateVoters?: string[]
+  usesDatePolling?: boolean // New field
   hostId: string
   hostUsername: string
   code: string

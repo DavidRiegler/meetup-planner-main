@@ -35,6 +35,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           }))
         : undefined,
       dateAvailabilities: data.dateAvailabilities || [],
+      dateFinalized: data.dateFinalized || false,
+      finalizedAt: data.finalizedAt?.toDate
+        ? data.finalizedAt.toDate()
+        : data.finalizedAt
+          ? new Date(data.finalizedAt)
+          : undefined,
+      winningDateVotes: data.winningDateVotes || undefined,
+      winningDateVoters: data.winningDateVoters || undefined,
+      usesDatePolling: data.usesDatePolling || false, // Add the new field
       hostId: data.hostId || "",
       hostUsername: data.hostUsername || "",
       code: data.code || "",

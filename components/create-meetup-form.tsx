@@ -8,6 +8,7 @@ import { useIntl } from "./intl-provider"
 import { useToast } from "./toast"
 import type { ShoppingItem } from "@/lib/types"
 import { isValidGoogleMapsUrl, extractLocationName } from "@/lib/maps-utils"
+import { interpolate } from "@/lib/translations"
 import { v4 as uuidv4 } from "uuid"
 import { MapPin, Plus, Trash2, ExternalLink } from "lucide-react"
 
@@ -20,8 +21,31 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
   const { t } = useIntl()
   const { showToast } = useToast()
 
+  // Define the type for the form data, including possibleDates and usesDatePolling
+  type MeetupFormData = {
+    title: string
+    description: string
+    location: string
+    date: string
+    time: string
+    endDate: string
+    endTime: string
+    hasAlcohol: boolean
+    possibleDates?: Array<{
+      id: string
+      date: string
+      time: string
+      endTime: string
+      description: string
+    }>
+    usesDatePolling?: boolean
+    hostId?: string
+    hostUsername?: string
+    shoppingList?: ShoppingItem[]
+  }
+
   // Update the form state to include end date and time
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MeetupFormData>({
     title: "",
     description: "",
     location: "",
@@ -60,24 +84,24 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.title.trim()) newErrors.title = "Title is required"
-    if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (!formData.location.trim()) newErrors.location = "Location is required"
+    if (!formData.title.trim()) newErrors.title = t("titleRequired")
+    if (!formData.description.trim()) newErrors.description = t("descriptionRequired")
+    if (!formData.location.trim()) newErrors.location = t("locationRequired")
 
     // Validate Google Maps URL if provided
     if (formData.location.startsWith("http") && !isValidGoogleMapsUrl(formData.location)) {
-      newErrors.location = "Please provide a valid Google Maps link or enter a location name"
+      newErrors.location = t("validGoogleMapsLink")
     }
 
     // Only validate single date if not using multiple dates
     if (!showDateOptions) {
-      if (!formData.date) newErrors.date = "Date is required"
-      if (!formData.time) newErrors.time = "Time is required"
+      if (!formData.date) newErrors.date = t("dateRequired")
+      if (!formData.time) newErrors.time = t("timeRequired")
     } else {
       // Validate that at least one date option is properly filled
       const validDateOptions = possibleDates.filter((d) => d.date && d.time)
       if (validDateOptions.length === 0) {
-        newErrors.date = "Please add at least one complete date option"
+        newErrors.date = t("addCompleteDateOption")
       }
     }
 
@@ -89,8 +113,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     if (!newItem.name.trim()) {
       showToast({
         type: "warning",
-        title: "Item name required",
-        message: "Please enter an item name",
+        title: t("itemNameRequired"),
+        message: t("enterItemName"),
       })
       return
     }
@@ -98,8 +122,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     if (!newItem.unit.trim()) {
       showToast({
         type: "warning",
-        title: "Unit required",
-        message: "Please enter a unit (e.g., kg, pieces, bottles)",
+        title: t("unitRequired"),
+        message: t("enterUnit"),
       })
       return
     }
@@ -121,8 +145,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
 
     showToast({
       type: "success",
-      title: "Item added",
-      message: `${newItem.name} added to shopping list`,
+      title: t("itemAdded"),
+      message: interpolate(t("itemAddedToList"), { item: newItem.name }),
     })
   }
 
@@ -133,8 +157,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     if (item) {
       showToast({
         type: "info",
-        title: "Item removed",
-        message: `${item.name} removed from shopping list`,
+        title: t("itemRemoved"),
+        message: interpolate(t("itemRemovedFromList"), { item: item.name }),
       })
     }
   }
@@ -146,8 +170,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     if (!validateForm()) {
       showToast({
         type: "error",
-        title: "Form validation failed",
-        message: "Please fix the errors and try again",
+        title: t("formValidationFailed"),
+        message: t("fixErrorsAndTryAgain"),
       })
       return
     }
@@ -155,42 +179,71 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     setLoading(true)
 
     try {
+      // Prepare the meetup data
+      let meetupData = {
+        ...formData,
+        hostId: user.id,
+        hostUsername: user.username,
+        shoppingList,
+      }
+
+      // Handle date options vs single date
+      if (showDateOptions && possibleDates.length > 0) {
+        const validDateOptions = possibleDates.filter((d) => d.date && d.time)
+
+        // Use the first date option as the initial meetup date
+        const firstDate = validDateOptions[0]
+        meetupData = {
+          ...meetupData,
+          date: firstDate.date,
+          time: firstDate.time,
+          endTime: firstDate.endTime || "",
+          // Add the possible dates for polling
+          possibleDates: validDateOptions.map((d) => ({
+            ...d,
+          })),
+          // Mark that this meetup uses date polling
+          usesDatePolling: true,
+        }
+      } else {
+        // Regular single date meetup
+        meetupData = {
+          ...meetupData,
+          usesDatePolling: false,
+        }
+      }
+
       const response = await fetch("/api/meetups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          hostId: user.id,
-          hostUsername: user.username,
-          shoppingList,
-          possibleDates: possibleDates
-            .filter((d) => d.date && d.time)
-            .map((d) => ({
-              ...d,
-              date: new Date(d.date),
-            })),
-        }),
+        body: JSON.stringify(meetupData),
       })
 
       if (response.ok) {
         const meetup = await response.json()
+
+        let successMessage = interpolate(t("meetupCodeIs"), { code: meetup.code })
+        if (showDateOptions) {
+          successMessage += t("datePollingNote")
+        }
+
         showToast({
           type: "success",
-          title: "Meetup created successfully!",
-          message: `Your meetup code is: ${meetup.code}`,
-          duration: 8000,
+          title: t("meetupCreatedSuccess"),
+          message: successMessage,
+          duration: 10000,
         })
         onBack()
       } else {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create meetup")
+        throw new Error(errorData.error || t("failedToCreateMeetup"))
       }
     } catch (error) {
       console.error("Error creating meetup:", error)
       showToast({
         type: "error",
-        title: "Failed to create meetup",
-        message: error instanceof Error ? error.message : "Please try again",
+        title: t("failedToCreateMeetup"),
+        message: error instanceof Error ? error.message : t("tryAgain"),
       })
     }
 
@@ -217,7 +270,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className={`input ${errors.title ? "border-destructive" : ""}`}
-            placeholder="Enter meetup title"
+            placeholder={t("enterMeetupTitle")}
           />
           {errors.title && <div className="form-error">{errors.title}</div>}
         </div>
@@ -228,7 +281,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className={`input textarea ${errors.description ? "border-destructive" : ""}`}
-            placeholder="Describe your meetup"
+            placeholder={t("describeMeetup")}
           />
           {errors.description && <div className="form-error">{errors.description}</div>}
         </div>
@@ -243,41 +296,58 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             className={`input ${errors.location ? "border-destructive" : ""}`}
-            placeholder="Enter location or paste Google Maps link"
+            placeholder={t("enterLocationOrMaps")}
           />
           {errors.location && <div className="form-error">{errors.location}</div>}
           {isGoogleMapsLink && (
             <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded flex items-center gap-2">
               <ExternalLink size={14} className="text-green-600" />
-              <span className="text-sm text-green-700">Google Maps link detected: {locationDisplayName}</span>
+              <span className="text-sm text-green-700">
+                {interpolate(t("googleMapsDetected"), { location: locationDisplayName })}
+              </span>
             </div>
           )}
         </div>
 
-        {/* Multiple Date Options - Move this BEFORE single date inputs */}
+        {/* Multiple Date Options */}
         <div className="form-group">
           <div className="flex items-center justify-between mb-4">
-            <label className="form-label">Date Options</label>
+            <label className="form-label">{t("dateOptions")}</label>
             <button
               type="button"
               onClick={() => setShowDateOptions(!showDateOptions)}
               className="button button-outline button-sm"
             >
-              {showDateOptions ? "Use Single Date" : "Add Multiple Date Options"}
+              {showDateOptions ? t("useSingleDate") : t("addMultipleDateOptions")}
             </button>
           </div>
 
           {showDateOptions ? (
             <div className="date-options-section">
-              <p className="text-sm text-muted mb-4">
-                Add multiple date options for participants to vote on. They'll choose which dates work for them.
-              </p>
+              <p className="text-sm text-muted mb-4">{t("multipleDateNote")}</p>
 
               {possibleDates.map((dateOption, index) => (
                 <div key={dateOption.id} className="date-option-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">
+                      {interpolate(t("dateOption"), { number: index + 1 })}
+                      {index === 0 && <span className="badge badge-primary ml-2">{t("initialDate")}</span>}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = possibleDates.filter((_, i) => i !== index)
+                        setPossibleDates(updated)
+                      }}
+                      className="button button-destructive button-sm"
+                    >
+                      <Trash2 size={14} />
+                      {t("remove")}
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="form-group">
-                      <label className="form-label">Date</label>
+                      <label className="form-label">{t("date")} *</label>
                       <input
                         type="date"
                         value={dateOption.date}
@@ -288,10 +358,11 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                         }}
                         className="input"
                         min={new Date().toISOString().split("T")[0]}
+                        required
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Start Time</label>
+                      <label className="form-label">{t("startTime")} *</label>
                       <input
                         type="time"
                         value={dateOption.time}
@@ -301,10 +372,13 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                           setPossibleDates(updated)
                         }}
                         className="input"
+                        required
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">End Time (Optional)</label>
+                      <label className="form-label">
+                        {t("endTime")} ({t("optional")})
+                      </label>
                       <input
                         type="time"
                         value={dateOption.endTime}
@@ -317,7 +391,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Description (Optional)</label>
+                      <label className="form-label">{t("descriptionOptional")}</label>
                       <input
                         type="text"
                         value={dateOption.description}
@@ -327,21 +401,10 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                           setPossibleDates(updated)
                         }}
                         className="input"
-                        placeholder="e.g., Afternoon session"
+                        placeholder={t("afternoonSession")}
                       />
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = possibleDates.filter((_, i) => i !== index)
-                      setPossibleDates(updated)
-                    }}
-                    className="button button-destructive button-sm mt-2"
-                  >
-                    <Trash2 size={14} />
-                    Remove Date Option
-                  </button>
                 </div>
               ))}
 
@@ -362,12 +425,20 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                 className="button button-outline"
               >
                 <Plus size={16} />
-                Add Date Option
+                {t("addDateOption")}
               </button>
+
+              {possibleDates.length > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-sm text-blue-700">
+                    <strong>{t("note")}:</strong> {t("firstDateNote")}
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <>
-              {/* Single Date/Time Inputs - Only show when NOT using multiple dates */}
+              {/* Single Date/Time Inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">
                   <label className="form-label">{t("date")}</label>
@@ -395,7 +466,9 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">
-                  <label className="form-label">End Date (Optional)</label>
+                  <label className="form-label">
+                    {t("endDate")} ({t("optional")})
+                  </label>
                   <input
                     type="date"
                     value={formData.endDate}
@@ -403,11 +476,13 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
                     className="input"
                     min={formData.date || new Date().toISOString().split("T")[0]}
                   />
-                  <div className="text-sm text-muted mt-1">Leave empty for single-day events</div>
+                  <div className="text-sm text-muted mt-1">{t("leaveEmptyForSingleDay")}</div>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">End Time (Optional)</label>
+                  <label className="form-label">
+                    {t("endTime")} ({t("optional")})
+                  </label>
                   <input
                     type="time"
                     value={formData.endTime}
@@ -418,6 +493,8 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
               </div>
             </>
           )}
+
+          {errors.date && showDateOptions && <div className="form-error">{errors.date}</div>}
         </div>
 
         <div className="form-group">
@@ -492,12 +569,12 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
 
           {shoppingList.length > 0 && (
             <div className="grid gap-2">
-              <h4 className="font-medium">Shopping Items:</h4>
+              <h4 className="font-medium">{t("shoppingItems")}</h4>
               {shoppingList.map((item) => (
                 <div key={item.id} className="shopping-item">
                   <span>
                     <strong>{item.name}</strong> - {item.baseAmount} {item.unit}
-                    {item.perPerson && <span className="badge badge-primary ml-2">Per Person</span>}
+                    {item.perPerson && <span className="badge badge-primary ml-2">{t("perPerson")}</span>}
                     <span className="text-muted ml-2">({t(item.category)})</span>
                   </span>
                   <button

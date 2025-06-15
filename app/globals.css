@@ -621,6 +621,131 @@ body {
   font-weight: 500;
 }
 
+/* Error Boundary Styles */
+.error-boundary-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--background);
+}
+
+.error-boundary-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+}
+
+.error-boundary-icon {
+  margin-bottom: 2rem;
+}
+
+.error-boundary-content {
+  margin-bottom: 2rem;
+}
+
+.error-boundary-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 1rem;
+}
+
+.error-boundary-message {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.error-boundary-details {
+  text-align: left;
+  background: var(--muted);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+
+.error-boundary-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+.error-boundary-summary:hover {
+  background: var(--secondary);
+}
+
+.error-boundary-error-info {
+  padding: 1rem 0;
+}
+
+.error-boundary-error-info h4 {
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--foreground);
+}
+
+.error-boundary-error-info code {
+  background: var(--secondary);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  display: block;
+  word-break: break-word;
+}
+
+.error-boundary-stack {
+  background: var(--secondary);
+  padding: 1rem;
+  border-radius: var(--radius);
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-boundary-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .error-boundary-card {
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .error-boundary-title {
+    font-size: 1.5rem;
+  }
+
+  .error-boundary-message {
+    font-size: 1rem;
+  }
+
+  .error-boundary-actions {
+    flex-direction: column;
+  }
+}
+
 /* Toast Notifications - Top Left */
 .toast-container {
   position: fixed;
@@ -2104,4 +2229,50 @@ body {
   .date-availability-footer .button {
     width: 100%;
   }
+}
+
+/* Add these styles for the date finalization features: */
+
+.date-poll-finalized {
+  margin-bottom: 16px;
+}
+
+.date-poll-finalized-winner {
+  border-color: var(--success);
+  background: rgba(56, 161, 105, 0.1);
+  position: relative;
+}
+
+.date-poll-finalized-winner::after {
+  content: "FINAL DATE";
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  background: var(--success);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.date-poll-finalized-badge {
+  background: var(--success);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.date-poll-finalize {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.date-poll-finalize .button {
+  min-width: 200px;
 }

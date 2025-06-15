@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useAuth } from "./auth-provider"
 import { useIntl } from "./intl-provider"
 import { useToast } from "./toast"
+import { interpolate } from "@/lib/translations"
 import { Eye, EyeOff } from "lucide-react"
 
 export function AuthForm() {
@@ -25,21 +26,21 @@ export function AuthForm() {
     const newErrors: Record<string, string> = {}
 
     if (!username.trim()) {
-      newErrors.username = "Username is required"
+      newErrors.username = t("usernameRequired")
     } else if (username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters"
+      newErrors.username = t("usernameMinLength")
     }
 
     if (!isLogin && !fullName.trim()) {
-      newErrors.fullName = "Full name is required"
+      newErrors.fullName = t("fullNameRequired")
     } else if (!isLogin && fullName.length < 2) {
-      newErrors.fullName = "Full name must be at least 2 characters"
+      newErrors.fullName = t("fullNameMinLength")
     }
 
     if (!password) {
-      newErrors.password = "Password is required"
+      newErrors.password = t("passwordRequired")
     } else if (!isLogin && password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+      newErrors.password = t("passwordMinLength")
     }
 
     setErrors(newErrors)
@@ -52,8 +53,8 @@ export function AuthForm() {
     if (!validateForm()) {
       showToast({
         type: "error",
-        title: "Form validation failed",
-        message: "Please fix the errors and try again",
+        title: t("formValidationFailed"),
+        message: t("fixErrorsAndTryAgain"),
       })
       return
     }
@@ -67,17 +68,19 @@ export function AuthForm() {
       if (success) {
         showToast({
           type: "success",
-          title: isLogin ? "Welcome back!" : "Account created!",
-          message: isLogin ? `Welcome back, @${username}` : `Welcome to Meetup Planner, ${fullName}!`,
+          title: isLogin ? t("welcomeBack") : t("accountCreated"),
+          message: isLogin
+            ? interpolate(t("welcomeMessage"), { username })
+            : interpolate(t("welcomeNewUser"), { fullName }),
         })
       } else {
-        throw new Error(isLogin ? "Invalid username or password" : "Failed to create account")
+        throw new Error(isLogin ? t("invalidCredentials") : t("accountCreationFailed"))
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Authentication failed"
+      const errorMessage = error instanceof Error ? error.message : t("unexpectedError")
       showToast({
         type: "error",
-        title: isLogin ? "Login failed" : "Registration failed",
+        title: isLogin ? t("loginFailed") : t("registrationFailed"),
         message: errorMessage,
       })
     }
@@ -90,9 +93,7 @@ export function AuthForm() {
       <div className="auth-card">
         <div className="auth-header">
           <h2 className="auth-title">{isLogin ? t("login") : t("register")}</h2>
-          <p className="auth-subtitle">
-            {isLogin ? "Welcome back! Please sign in to your account." : "Create your account to get started."}
-          </p>
+          <p className="auth-subtitle">{isLogin ? t("welcomeBackSubtitle") : t("createAccountSubtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -103,7 +104,7 @@ export function AuthForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={`auth-input ${errors.username ? "auth-input-error" : ""}`}
-              placeholder="Enter your username"
+              placeholder={t("username")}
               autoComplete="username"
             />
             {errors.username && <div className="auth-error">{errors.username}</div>}
@@ -111,13 +112,13 @@ export function AuthForm() {
 
           {!isLogin && (
             <div className="auth-field">
-              <label className="auth-label">Full Name</label>
+              <label className="auth-label">{t("fullName")}</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className={`auth-input ${errors.fullName ? "auth-input-error" : ""}`}
-                placeholder="Enter your full name"
+                placeholder={t("fullName")}
                 autoComplete="name"
               />
               {errors.fullName && <div className="auth-error">{errors.fullName}</div>}
@@ -132,7 +133,7 @@ export function AuthForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`auth-input auth-password-input ${errors.password ? "auth-input-error" : ""}`}
-                placeholder="Enter your password"
+                placeholder={t("password")}
                 autoComplete={isLogin ? "current-password" : "new-password"}
               />
               <button
@@ -145,7 +146,7 @@ export function AuthForm() {
               </button>
             </div>
             {errors.password && <div className="auth-error">{errors.password}</div>}
-            {!isLogin && <div className="auth-hint">Password must be at least 6 characters long</div>}
+            {!isLogin && <div className="auth-hint">{t("passwordMinLength")}</div>}
           </div>
 
           <button type="submit" disabled={loading} className="auth-submit">
@@ -156,7 +157,7 @@ export function AuthForm() {
 
         <div className="auth-switch">
           <button onClick={() => setIsLogin(!isLogin)} className="auth-switch-btn">
-            {isLogin ? "Need an account? Register" : "Have an account? Login"}
+            {isLogin ? t("needAccount") : t("haveAccount")}
           </button>
         </div>
       </div>

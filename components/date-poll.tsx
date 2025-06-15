@@ -2,16 +2,71 @@
 import { useIntl } from "./intl-provider"
 import type { MeetupDate, DateAvailability } from "@/lib/types"
 import { Calendar, Clock, Users, Check, X } from "lucide-react"
+import { useState } from "react"
+import { useToast } from "./toast"
 
 interface DatePollProps {
   possibleDates: MeetupDate[]
   dateAvailabilities: DateAvailability[]
   isHost: boolean
   showResults?: boolean
+  meetupId?: string
+  dateFinalized?: boolean
+  winningDateVotes?: number
+  onUpdate?: () => void
 }
 
-export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResults = false }: DatePollProps) {
+export function DatePoll({
+  possibleDates,
+  dateAvailabilities,
+  isHost,
+  showResults = false,
+  meetupId,
+  dateFinalized = false,
+  winningDateVotes,
+  onUpdate,
+}: DatePollProps) {
   const { t } = useIntl()
+  const { showToast } = useToast()
+  const [finalizing, setFinalizing] = useState(false)
+
+  // Add the finalize date function
+  const handleFinalizeDate = async () => {
+    if (!meetupId || !isHost) return
+
+    setFinalizing(true)
+    try {
+      const response = await fetch(`/api/meetups/${meetupId}/finalize-date`, {
+        method: "POST",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to finalize date")
+      }
+
+      const result = await response.json()
+
+      showToast({
+        type: "success",
+        title: "Date finalized",
+        message: `${result.winningDate.date} has been set as the meetup date with ${result.votes} votes`,
+      })
+
+      if (onUpdate) {
+        onUpdate()
+      }
+    } catch (error) {
+      console.error("Error finalizing date:", error)
+      showToast({
+        type: "error",
+        title: "Failed to finalize date",
+        message: error instanceof Error ? error.message : "Please try again",
+      })
+    } finally {
+      setFinalizing(false)
+    }
+  }
 
   if (!possibleDates || possibleDates.length === 0) {
     return null
@@ -48,6 +103,7 @@ export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResult
         <h4 className="date-poll-title">
           <Calendar size={18} />
           {showResults ? "Date Poll Results" : "Available Dates"}
+          {dateFinalized && <span className="badge badge-success ml-2">Finalized</span>}
         </h4>
         {showResults && (
           <div className="date-poll-summary">
@@ -62,6 +118,17 @@ export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResult
         )}
       </div>
 
+      {dateFinalized && (
+        <div className="date-poll-finalized">
+          <div className="alert alert-success">
+            <Check size={16} />
+            <span>
+              Date has been finalized with {winningDateVotes} votes. The meetup date has been updated automatically.
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="date-poll-options">
         {sortedDates.map((date) => {
           const stats = getDateStats(date.id)
@@ -71,7 +138,10 @@ export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResult
             stats.percentage >= Math.max(...sortedDates.map((d) => getDateStats(d.id).percentage))
 
           return (
-            <div key={date.id} className={`date-poll-option ${isWinner ? "date-poll-winner" : ""}`}>
+            <div
+              key={date.id}
+              className={`date-poll-option ${isWinner ? "date-poll-winner" : ""} ${dateFinalized && isWinner ? "date-poll-finalized-winner" : ""}`}
+            >
               <div className="date-poll-option-header">
                 <div className="date-poll-option-info">
                   <div className="date-poll-date">
@@ -95,7 +165,8 @@ export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResult
                       <Users size={14} />
                       {stats.available}/{stats.total}
                     </div>
-                    {isWinner && <div className="date-poll-winner-badge">🏆</div>}
+                    {isWinner && !dateFinalized && <div className="date-poll-winner-badge">🏆</div>}
+                    {isWinner && dateFinalized && <div className="date-poll-finalized-badge">✅ Final</div>}
                   </div>
                 )}
               </div>
@@ -146,6 +217,18 @@ export function DatePoll({ possibleDates, dateAvailabilities, isHost, showResult
           )
         })}
       </div>
+
+      {isHost && showResults && !dateFinalized && dateAvailabilities.length > 0 && (
+        <div className="date-poll-finalize">
+          <button onClick={handleFinalizeDate} disabled={finalizing} className="button button-primary">
+            {finalizing && <div className="loading-spinner" />}
+            Finalize Winning Date
+          </button>
+          <p className="text-sm text-muted mt-2">
+            This will set the date with the most votes as the official meetup date.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

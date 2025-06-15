@@ -29,23 +29,33 @@ export function formatDateRange(meetup: Meetup): string {
   const hasEndDate = meetup.endDate !== undefined
 
   if (!hasEndDate) {
-    return startDate.toLocaleDateString()
+    return startDate.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
   }
 
   const endDate = new Date(meetup.endDate!)
 
   // Same day
   if (startDate.toDateString() === endDate.toDateString()) {
-    return startDate.toLocaleDateString()
+    return startDate.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
   }
 
   // Same month
   if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
-    return `${startDate.getDate()} - ${endDate.getDate()} ${startDate.toLocaleDateString("default", { month: "long", year: "numeric" })}`
+    return `${startDate.getDate()} - ${endDate.getDate()} ${startDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
   }
 
   // Different months
-  return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+  return `${startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
 }
 
 export function formatTimeRange(meetup: Meetup): string {
@@ -54,4 +64,39 @@ export function formatTimeRange(meetup: Meetup): string {
   }
 
   return `${meetup.time} - ${meetup.endTime}`
+}
+
+// Add a new utility for consistent date display
+export function formatMeetupDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+}
+
+// Add utility for consistent time display
+export function formatMeetupTime(time: string, endTime?: string): string {
+  if (!endTime) {
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+  }
+
+  const startFormatted = new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+
+  const endFormatted = new Date(`2000-01-01T${endTime}`).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+
+  return `${startFormatted} - ${endFormatted}`
 }

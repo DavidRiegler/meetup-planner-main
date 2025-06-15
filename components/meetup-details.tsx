@@ -21,6 +21,7 @@ import {
   UserMinus,
   Settings,
   ExternalLink,
+  Vote,
 } from "lucide-react"
 import { Modal } from "./modal"
 import { ParticipantEditModal } from "./participant-edit-modal"
@@ -123,6 +124,10 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
         possibleDates: Array.isArray(data.possibleDates) ? data.possibleDates : [],
         dateAvailabilities: Array.isArray(data.dateAvailabilities) ? data.dateAvailabilities : [],
         itemSuggestions: Array.isArray(data.itemSuggestions) ? data.itemSuggestions : [],
+        dateFinalized: data.dateFinalized || false,
+        winningDateVotes: data.winningDateVotes || 0,
+        winningDateVoters: data.winningDateVoters || [],
+        usesDatePolling: data.usesDatePolling || false,
       }
 
       setMeetup(meetupData)
@@ -468,6 +473,12 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
             </button>
             <h1 className="text-2xl font-bold">{meetup.title}</h1>
             <span className="badge badge-primary">{meetup.code}</span>
+            {meetup.usesDatePolling && !meetup.dateFinalized && (
+              <span className="badge badge-warning">
+                <Vote size={12} />
+                Date Polling
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -506,6 +517,18 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
               <Settings size={20} />
               {t("meetupDetails")}
             </h2>
+
+            {/* Show date polling status */}
+            {meetup.usesDatePolling && !meetup.dateFinalized && (
+              <div className="alert alert-warning mb-4">
+                <Vote size={16} />
+                <span>
+                  This meetup uses date polling. The current date is temporary - participants can vote on the final date
+                  below.
+                </span>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-muted" />
@@ -528,7 +551,12 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-muted" />
-                <span>{formatDateRange(meetup)}</span>
+                <span>
+                  {formatDateRange(meetup)}
+                  {meetup.usesDatePolling && !meetup.dateFinalized && (
+                    <span className="text-warning ml-2">(Temporary)</span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-muted" />
@@ -555,10 +583,14 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
                 dateAvailabilities={meetup.dateAvailabilities || []}
                 isHost={isHost}
                 showResults={true}
+                meetupId={meetup.id}
+                dateFinalized={meetup.dateFinalized}
+                winningDateVotes={meetup.winningDateVotes}
+                onUpdate={fetchMeetupDetails}
               />
 
-              {/* Allow participants to update their availability */}
-              {currentParticipant && !isHost && (
+              {/* Allow participants to update their availability - only if not finalized */}
+              {currentParticipant && !isHost && !meetup.dateFinalized && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <DateAvailabilityForm
                     meetupId={meetup.id}
@@ -566,6 +598,18 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
                     existingAvailabilities={meetup.dateAvailabilities || []}
                     onUpdate={fetchMeetupDetails}
                   />
+                </div>
+              )}
+
+              {meetup.dateFinalized && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded">
+                  <p className="text-sm text-green-700">
+                    <strong>Date finalized:</strong> The meetup date has been automatically updated based on the poll
+                    results.
+                    {meetup.winningDateVoters && meetup.winningDateVoters.length > 0 && (
+                      <span> Voted by: {meetup.winningDateVoters.join(", ")}</span>
+                    )}
+                  </p>
                 </div>
               )}
             </div>
