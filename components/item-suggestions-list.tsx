@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useToast } from "./toast"
 import type { ItemSuggestion } from "@/lib/types"
-import { Package, Check, X, Clock } from "lucide-react"
+import { Package, Check, X } from "lucide-react"
 
 interface ItemSuggestionsListProps {
   meetupId: string
@@ -110,6 +110,9 @@ export function ItemSuggestionsList({ meetupId, suggestions, isHost, onUpdate }:
                   <div className="item-suggestion-meta">
                     <span className="item-suggestion-category">{suggestion.category}</span>
                     <span className="item-suggestion-author">by @{suggestion.participantUsername}</span>
+                    <span className="item-suggestion-time">
+                      {new Date(suggestion.suggestedAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
 

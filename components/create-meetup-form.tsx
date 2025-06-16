@@ -16,36 +16,15 @@ interface CreateMeetupFormProps {
   onBack: () => void
 }
 
+type ItemCategory = "food" | "drink" | "alcohol" | "other"
+
 export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
   const { user } = useAuth()
   const { t } = useIntl()
   const { showToast } = useToast()
 
-  // Define the type for the form data, including possibleDates and usesDatePolling
-  type MeetupFormData = {
-    title: string
-    description: string
-    location: string
-    date: string
-    time: string
-    endDate: string
-    endTime: string
-    hasAlcohol: boolean
-    possibleDates?: Array<{
-      id: string
-      date: string
-      time: string
-      endTime: string
-      description: string
-    }>
-    usesDatePolling?: boolean
-    hostId?: string
-    hostUsername?: string
-    shoppingList?: ShoppingItem[]
-  }
-
   // Update the form state to include end date and time
-  const [formData, setFormData] = useState<MeetupFormData>({
+  const [formData, setFormData] = useState({
     title: "",
     description: "",
     location: "",
@@ -74,7 +53,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
     name: "",
     baseAmount: 1,
     unit: "",
-    category: "food" as const,
+    category: "food" as ItemCategory,
     perPerson: false,
   })
 
@@ -180,11 +159,32 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
 
     try {
       // Prepare the meetup data
-      let meetupData = {
+      let meetupData: {
+        title: string
+        description: string
+        location: string
+        date: string
+        time: string
+        endDate: string
+        endTime: string
+        hasAlcohol: boolean
+        hostId: string
+        hostUsername: string
+        shoppingList: ShoppingItem[]
+        usesDatePolling: boolean
+        possibleDates?: Array<{
+          id: string
+          date: Date
+          time: string
+          endTime: string
+          description: string
+        }>
+      } = {
         ...formData,
         hostId: user.id,
         hostUsername: user.username,
         shoppingList,
+        usesDatePolling: false,
       }
 
       // Handle date options vs single date
@@ -201,6 +201,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
           // Add the possible dates for polling
           possibleDates: validDateOptions.map((d) => ({
             ...d,
+            date: new Date(d.date),
           })),
           // Mark that this meetup uses date polling
           usesDatePolling: true,
@@ -542,7 +543,7 @@ export function CreateMeetupForm({ onBack }: CreateMeetupFormProps) {
             <div className="grid grid-cols-2 gap-2">
               <select
                 value={newItem.category}
-                onChange={(e) => setNewItem({ ...newItem, category: e.target.value as any })}
+                onChange={(e) => setNewItem({ ...newItem, category: e.target.value as ItemCategory })}
                 className="input select"
               >
                 <option value="food">{t("food")}</option>

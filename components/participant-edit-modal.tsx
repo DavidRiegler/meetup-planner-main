@@ -2,10 +2,11 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useToast } from "./toast"
+import { Modal } from "./modal"
 import type { Participant, Meetup } from "@/lib/types"
-import { Plus, Trash2, X, User, Clock, MessageSquare, Package } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 
 interface ParticipantEditModalProps {
   isOpen: boolean
@@ -18,96 +19,28 @@ interface ParticipantEditModalProps {
 export function ParticipantEditModal({ isOpen, onClose, participant, meetup, onUpdate }: ParticipantEditModalProps) {
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+
   const [formData, setFormData] = useState({
-    isVegetarian: false,
-    isVegan: false,
-    drinksAlcohol: false,
-    stayDuration: 4,
-    joinTime: "",
-    suggestions: "",
-    bringingItems: [] as string[],
+    isVegetarian: participant.isVegetarian || false,
+    isVegan: participant.isVegan || false,
+    drinksAlcohol: participant.drinksAlcohol || false,
+    stayDuration: participant.stayDuration || 4,
+    joinTime: participant.joinTime || "",
+    suggestions: participant.suggestions || "",
+    bringingItems: participant.bringingItems || [],
   })
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsVisible(true)
-      document.body.style.overflow = "hidden"
-    } else {
-      setIsVisible(false)
-      document.body.style.overflow = "unset"
-    }
+  const [newItem, setNewItem] = useState("")
 
-    return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (participant) {
-      setFormData({
-        isVegetarian: participant.isVegetarian || false,
-        isVegan: participant.isVegan || false,
-        drinksAlcohol: participant.drinksAlcohol || false,
-        stayDuration: participant.stayDuration || 4,
-        joinTime: participant.joinTime || "",
-        suggestions: participant.suggestions || "",
-        bringingItems: participant.bringingItems || [],
-      })
-    }
-  }, [participant])
-
-  if (!isOpen) return null
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && !loading) {
-      onClose()
-    }
-  }
-
-  const addBringingItem = () => {
-    setFormData({
-      ...formData,
-      bringingItems: [...formData.bringingItems, ""],
-    })
-  }
-
-  const updateBringingItem = (index: number, value: string) => {
-    const updatedItems = [...formData.bringingItems]
-    updatedItems[index] = value
-    setFormData({
-      ...formData,
-      bringingItems: updatedItems,
-    })
-  }
-
-  const removeBringingItem = (index: number) => {
-    const updatedItems = formData.bringingItems.filter((_, i) => i !== index)
-    setFormData({
-      ...formData,
-      bringingItems: updatedItems,
-    })
-  }
-
-  const handleSubmit = async () => {
-    if (!formData.joinTime) {
-      showToast({
-        type: "warning",
-        title: "Join time required",
-        message: "Please specify when you plan to join the meetup",
-      })
-      return
-    }
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
+
     try {
       const response = await fetch(`/api/meetups/${meetup.id}/participants/${participant.participantId}/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          bringingItems: formData.bringingItems.filter((item) => item.trim() !== ""),
-        }),
+        body: JSON.stringify(formData),
       })
 
       if (!response.ok) {
@@ -135,167 +68,156 @@ export function ParticipantEditModal({ isOpen, onClose, participant, meetup, onU
     }
   }
 
+  const addBringingItem = () => {
+    if (!newItem.trim()) return
+
+    setFormData({
+      ...formData,
+      bringingItems: [...formData.bringingItems, newItem.trim()],
+    })
+    setNewItem("")
+  }
+
+  const removeBringingItem = (index: number) => {
+    setFormData({
+      ...formData,
+      bringingItems: formData.bringingItems.filter((_, i) => i !== index),
+    })
+  }
+
   return (
-    <div
-      className={`participant-edit-overlay ${isVisible ? "participant-edit-overlay-visible" : ""}`}
-      onClick={handleOverlayClick}
-    >
-      <div className={`participant-edit-modal ${isVisible ? "participant-edit-modal-visible" : ""}`}>
-        {/* Header */}
-        <div className="participant-edit-header">
-          <div className="participant-edit-header-content">
-            <div className="participant-edit-icon">
-              <User size={24} />
-            </div>
-            <div>
-              <h3 className="participant-edit-title">Edit Your Participation</h3>
-              <p className="participant-edit-subtitle">Update your preferences for "{meetup.title}"</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="participant-edit-close" disabled={loading}>
-            <X size={20} />
-          </button>
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Edit Your Participation" size="lg">
+      <form onSubmit={handleSubmit} className="grid gap-6">
+        {/* Dietary Preferences */}
+        <div className="form-group">
+          <label className="form-label">Dietary Preferences</label>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isVegetarian}
+                onChange={(e) => setFormData({ ...formData, isVegetarian: e.target.checked })}
+              />
+              🥬 Vegetarian
+            </label>
 
-        {/* Content */}
-        <div className="participant-edit-content">
-          {/* Dietary Preferences */}
-          <div className="participant-edit-section">
-            <h4 className="participant-edit-section-title">🍽️ Dietary Preferences</h4>
-            <div className="participant-edit-checkboxes">
-              <label className="participant-edit-checkbox">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isVegan}
+                onChange={(e) => setFormData({ ...formData, isVegan: e.target.checked })}
+              />
+              🌱 Vegan
+            </label>
+
+            {meetup.hasAlcohol && (
+              <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={formData.isVegetarian}
-                  onChange={(e) => setFormData({ ...formData, isVegetarian: e.target.checked })}
+                  checked={formData.drinksAlcohol}
+                  onChange={(e) => setFormData({ ...formData, drinksAlcohol: e.target.checked })}
                 />
-                <span className="participant-edit-checkbox-label">🥬 Vegetarian</span>
+                🍺 Drinks alcohol
               </label>
-
-              <label className="participant-edit-checkbox">
-                <input
-                  type="checkbox"
-                  checked={formData.isVegan}
-                  onChange={(e) => setFormData({ ...formData, isVegan: e.target.checked })}
-                />
-                <span className="participant-edit-checkbox-label">🌱 Vegan</span>
-              </label>
-
-              {meetup.hasAlcohol && (
-                <label className="participant-edit-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={formData.drinksAlcohol}
-                    onChange={(e) => setFormData({ ...formData, drinksAlcohol: e.target.checked })}
-                  />
-                  <span className="participant-edit-checkbox-label">🍺 Drinks Alcohol</span>
-                </label>
-              )}
-            </div>
-          </div>
-
-          {/* Duration and Join Time */}
-          <div className="participant-edit-section">
-            <h4 className="participant-edit-section-title">
-              <Clock size={16} />
-              Timing Details
-            </h4>
-            <div className="participant-edit-grid">
-              <div className="participant-edit-field">
-                <label className="participant-edit-label">Stay Duration (hours)</label>
-                <input
-                  type="number"
-                  value={formData.stayDuration}
-                  onChange={(e) => setFormData({ ...formData, stayDuration: Number(e.target.value) })}
-                  className="participant-edit-input"
-                  min="1"
-                  max="24"
-                />
-              </div>
-
-              <div className="participant-edit-field">
-                <label className="participant-edit-label">Join Time *</label>
-                <input
-                  type="time"
-                  value={formData.joinTime}
-                  onChange={(e) => setFormData({ ...formData, joinTime: e.target.value })}
-                  className="participant-edit-input"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Suggestions */}
-          <div className="participant-edit-section">
-            <h4 className="participant-edit-section-title">
-              <MessageSquare size={16} />
-              Suggestions for Host
-            </h4>
-            <textarea
-              value={formData.suggestions}
-              onChange={(e) => setFormData({ ...formData, suggestions: e.target.value })}
-              className="participant-edit-textarea"
-              placeholder="Any suggestions, requests, or special notes for the host..."
-              rows={3}
-            />
-          </div>
-
-          {/* Items Bringing */}
-          <div className="participant-edit-section">
-            <div className="participant-edit-section-header">
-              <h4 className="participant-edit-section-title">
-                <Package size={16} />
-                Items You're Bringing
-              </h4>
-              <button onClick={addBringingItem} className="participant-edit-add-btn" type="button">
-                <Plus size={14} />
-                Add Item
-              </button>
-            </div>
-
-            {formData.bringingItems.length > 0 ? (
-              <div className="participant-edit-items">
-                {formData.bringingItems.map((item, index) => (
-                  <div key={index} className="participant-edit-item">
-                    <input
-                      type="text"
-                      value={item}
-                      onChange={(e) => updateBringingItem(index, e.target.value)}
-                      className="participant-edit-input"
-                      placeholder="Item name (e.g., Chips, Soda, Dessert)"
-                    />
-                    <button
-                      onClick={() => removeBringingItem(index)}
-                      className="participant-edit-remove-btn"
-                      type="button"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="participant-edit-empty">
-                <Package size={32} className="participant-edit-empty-icon" />
-                <p className="participant-edit-empty-text">No items added yet</p>
-                <p className="participant-edit-empty-subtext">Click "Add Item" to add something you're bringing</p>
-              </div>
             )}
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="participant-edit-footer">
-          <button onClick={onClose} className="participant-edit-btn participant-edit-btn-cancel" disabled={loading}>
-            Cancel
-          </button>
-          <button onClick={handleSubmit} disabled={loading} className="participant-edit-btn participant-edit-btn-save">
-            {loading && <div className="participant-edit-spinner" />}
+        {/* Timing */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="form-group">
+            <label className="form-label">Stay Duration (hours)</label>
+            <input
+              type="number"
+              value={formData.stayDuration}
+              onChange={(e) => setFormData({ ...formData, stayDuration: Number(e.target.value) })}
+              className="input"
+              min="1"
+              max="24"
+            />
+            <div className="text-sm text-muted mt-1">How long do you plan to stay?</div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Join Time</label>
+            <input
+              type="time"
+              value={formData.joinTime}
+              onChange={(e) => setFormData({ ...formData, joinTime: e.target.value })}
+              className="input"
+            />
+            <div className="text-sm text-muted mt-1">When will you arrive?</div>
+          </div>
+        </div>
+
+        {/* Bringing Items */}
+        <div className="form-group">
+          <label className="form-label">Items You&apos;re Bringing</label>
+          <div className="grid gap-2">
+            {formData.bringingItems.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="flex-1 p-2 bg-gray-50 rounded">{item}</span>
+                <button
+                  type="button"
+                  onClick={() => removeBringingItem(index)}
+                  className="button button-destructive button-sm"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                placeholder="Add an item you&apos;re bringing..."
+                className="input flex-1"
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault()
+                    addBringingItem()
+                  }
+                }}
+              />
+              <button type="button" onClick={addBringingItem} className="button button-outline">
+                <Plus size={16} />
+                Add
+              </button>
+            </div>
+          </div>
+          <div className="text-sm text-muted mt-1">
+            Let others know what you&apos;re planning to bring (food, drinks, games, etc.)
+          </div>
+        </div>
+
+        {/* Suggestions */}
+        <div className="form-group">
+          <label className="form-label">Suggestions for the Host</label>
+          <textarea
+            value={formData.suggestions}
+            onChange={(e) => setFormData({ ...formData, suggestions: e.target.value })}
+            className="input textarea"
+            placeholder="Any suggestions, requests, or notes for the host..."
+            rows={3}
+          />
+          <div className="text-sm text-muted mt-1">
+            Share any ideas, special requests, or information that might be helpful for the host
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-4 border-t border-gray-200">
+          <button type="submit" disabled={loading} className="button button-primary">
+            {loading && <div className="loading-spinner" />}
             Save Changes
           </button>
+          <button type="button" onClick={onClose} className="button button-outline">
+            Cancel
+          </button>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   )
 }

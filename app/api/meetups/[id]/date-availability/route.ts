@@ -3,10 +3,19 @@ import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import type { DateAvailability } from "@/lib/types"
 
+interface DateAvailabilityRequest {
+  participantId: string
+  username: string
+  availabilities: Array<{
+    dateId: string
+    available: boolean
+  }>
+}
+
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params
-    const { participantId, username, availabilities } = await request.json()
+    const { participantId, username, availabilities }: DateAvailabilityRequest = await request.json()
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)
@@ -24,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     )
 
     // Add new availabilities
-    const newAvailabilities: DateAvailability[] = availabilities.map((a: any) => ({
+    const newAvailabilities: DateAvailability[] = availabilities.map((a) => ({
       participantId,
       username,
       dateId: a.dateId,

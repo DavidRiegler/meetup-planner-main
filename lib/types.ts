@@ -1,34 +1,7 @@
 export interface User {
   id: string
   username: string
-  fullName: string
-  createdAt: Date
-}
-
-export interface Meetup {
-  id: string
-  title: string
-  description: string
-  location: string
-  date: Date
-  time: string
-  endDate?: Date
-  endTime?: string
-  possibleDates?: MeetupDate[]
-  dateAvailabilities?: DateAvailability[]
-  dateFinalized?: boolean
-  finalizedAt?: Date
-  winningDateVotes?: number
-  winningDateVoters?: string[]
-  usesDatePolling?: boolean // New field to track if this meetup uses date polling
-  hostId: string
-  hostUsername: string
-  code: string
-  hasAlcohol: boolean
-  shoppingList: ShoppingItem[]
-  itemSuggestions?: ItemSuggestion[]
-  participants: Participant[]
-  costs: Cost[]
+  email: string
   createdAt: Date
 }
 
@@ -41,18 +14,10 @@ export interface ShoppingItem {
   perPerson?: boolean
 }
 
-export interface Participant {
-  id: string
-  participantId: string // This was missing - it's the user ID who joined
-  username: string
-  isVegetarian: boolean
-  isVegan: boolean
-  drinksAlcohol: boolean
-  stayDuration: number // in hours
-  joinTime: string
-  suggestions: string
-  bringingItems: string[]
-  joinedAt: Date
+export interface CostItem {
+  name: string
+  amount: number
+  sharedWith: string[]
 }
 
 export interface Cost {
@@ -64,46 +29,20 @@ export interface Cost {
   addedAt: Date
 }
 
-export interface CostItem {
-  name: string
-  amount: number
-  sharedWith: string[] // participant IDs who consumed this
-}
-
-export type Language = "en" | "de"
-export type Theme = "light" | "dark"
-
-// Add a more flexible type for Firebase documents
-export interface FirebaseMeetup {
+export interface Participant {
   id: string
-  title: string
-  description: string
-  location: string
-  date: any // Firebase Timestamp or Date
-  time: string
-  endDate?: any // Firebase Timestamp or Date
-  endTime?: string
-  possibleDates?: MeetupDate[]
-  dateAvailabilities?: DateAvailability[]
-  dateFinalized?: boolean
-  finalizedAt?: any // Firebase Timestamp or Date
-  winningDateVotes?: number
-  winningDateVoters?: string[]
-  usesDatePolling?: boolean // New field
-  hostId: string
-  hostUsername: string
-  code: string
-  hasAlcohol: boolean
-  shoppingList?: ShoppingItem[]
-  itemSuggestions?: ItemSuggestion[]
-  participants?: Participant[]
-  costs?: Cost[]
-  createdAt: any // Firebase Timestamp or Date
-  [key: string]: any // Allow additional properties
+  participantId: string
+  username: string
+  isVegetarian?: boolean
+  isVegan?: boolean
+  drinksAlcohol?: boolean
+  stayDuration?: number
+  joinTime?: string
+  suggestions?: string
+  bringingItems?: string[]
+  joinedAt: Date
+  updatedAt?: Date
 }
-
-// Add a helper type for meetup status
-export type MeetupStatus = "upcoming" | "inProgress" | "past"
 
 export interface MeetupDate {
   id: string
@@ -131,4 +70,64 @@ export interface ItemSuggestion {
   perPerson: boolean
   reason?: string
   suggestedAt: Date
+  status: "pending" | "accepted" | "rejected"
+}
+
+export interface Meetup {
+  id: string
+  title: string
+  description: string
+  location: string
+  date: Date
+  time: string
+  endDate?: Date
+  endTime?: string
+  hostId: string
+  hostUsername: string
+  code: string
+  hasAlcohol: boolean
+  shoppingList: ShoppingItem[]
+  participants: Participant[]
+  costs: Cost[]
+  createdAt: Date
+  updatedAt?: Date
+  possibleDates?: MeetupDate[]
+  dateAvailabilities?: DateAvailability[]
+  itemSuggestions?: ItemSuggestion[]
+  usesDatePolling?: boolean
+  dateFinalized?: boolean
+  finalizedAt?: Date
+  winningDateVotes?: number
+  winningDateVoters?: string[]
+}
+
+export interface FirebaseMeetup {
+  title: string
+  description: string
+  location: string
+  date: FirebaseTimestamp | Date
+  time: string
+  endDate?: FirebaseTimestamp | Date | null
+  endTime?: string
+  hostId: string
+  hostUsername: string
+  code: string
+  hasAlcohol: boolean
+  shoppingList: ShoppingItem[]
+  participants: Participant[]
+  costs: Cost[]
+  createdAt: FirebaseTimestamp | Date
+  updatedAt?: FirebaseTimestamp | Date
+  possibleDates?: MeetupDate[]
+  dateAvailabilities?: DateAvailability[]
+  itemSuggestions?: ItemSuggestion[]
+  usesDatePolling?: boolean
+  dateFinalized?: boolean
+  finalizedAt?: FirebaseTimestamp | Date
+  winningDateVotes?: number
+  winningDateVoters?: string[]
+}
+
+interface FirebaseTimestamp {
+  toDate(): Date
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "./auth-provider"
 import { useIntl } from "./intl-provider"
 import { useToast } from "./toast"
@@ -70,26 +70,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
   const isHost = meetup?.hostId === user?.id
   const currentParticipant = meetup?.participants?.find((p) => p.participantId === user?.id)
 
-  useEffect(() => {
-    fetchMeetupDetails()
-  }, [meetupId])
-
-  useEffect(() => {
-    if (meetup) {
-      setEditForm({
-        title: meetup.title,
-        description: meetup.description,
-        location: meetup.location,
-        date: meetup.date.toISOString().split("T")[0],
-        time: meetup.time,
-        endDate: meetup.endDate ? meetup.endDate.toISOString().split("T")[0] : "",
-        endTime: meetup.endTime || "",
-        hasAlcohol: meetup.hasAlcohol,
-      })
-    }
-  }, [meetup])
-
-  const fetchMeetupDetails = async () => {
+  const fetchMeetupDetails = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -142,7 +123,26 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [meetupId, showToast])
+
+  useEffect(() => {
+    fetchMeetupDetails()
+  }, [fetchMeetupDetails])
+
+  useEffect(() => {
+    if (meetup) {
+      setEditForm({
+        title: meetup.title,
+        description: meetup.description,
+        location: meetup.location,
+        date: meetup.date.toISOString().split("T")[0],
+        time: meetup.time,
+        endDate: meetup.endDate ? meetup.endDate.toISOString().split("T")[0] : "",
+        endTime: meetup.endTime || "",
+        hasAlcohol: meetup.hasAlcohol,
+      })
+    }
+  }, [meetup])
 
   const handleEditMeetup = async () => {
     if (!meetup || !isHost) return
@@ -255,7 +255,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
     })
   }
 
-  const updateCostItem = (index: number, field: keyof CostItem, value: any) => {
+  const updateCostItem = (index: number, field: keyof CostItem, value: string | number | string[]) => {
     const updatedItems = [...newCost.items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
     setNewCost({ ...newCost, items: updatedItems })
@@ -453,7 +453,7 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
         <div className="card text-center p-8">
           <AlertCircle size={48} className="mx-auto mb-4 text-muted" />
           <div className="text-xl mb-4">Meetup not found</div>
-          <div className="text-muted">The meetup you're looking for doesn't exist or has been deleted.</div>
+          <div className="text-muted">The meetup you&apos;re looking for doesn&apos;t exist or has been deleted.</div>
         </div>
       </div>
     )

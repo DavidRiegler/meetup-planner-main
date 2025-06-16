@@ -1,132 +1,128 @@
-export interface User {
-  id: string
-  username: string
-  fullName: string
-  createdAt: Date
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }
 
-export interface Meetup {
-  id: string
-  title: string
-  description: string
-  location: string
-  date: Date
-  time: string
-  endDate?: Date
-  endTime?: string
-  possibleDates?: MeetupDate[]
-  dateAvailabilities?: DateAvailability[]
-  dateFinalized?: boolean // New field
-  finalizedAt?: Date // New field
-  winningDateVotes?: number // New field
-  winningDateVoters?: string[] // New field
-  hostId: string
-  hostUsername: string
-  code: string
-  hasAlcohol: boolean
-  shoppingList: ShoppingItem[]
-  itemSuggestions?: ItemSuggestion[]
-  participants: Participant[]
-  costs: Cost[]
-  createdAt: Date
+export function generateId(): string {
+  return Math.random().toString(36).substr(2, 9)
 }
 
-export interface ShoppingItem {
-  id: string
-  name: string
-  baseAmount: number
-  unit: string
-  category: "food" | "drink" | "alcohol" | "other"
-  perPerson?: boolean
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 }
 
-export interface Participant {
-  id: string
-  participantId: string // This was missing - it's the user ID who joined
-  username: string
-  isVegetarian: boolean
-  isVegan: boolean
-  drinksAlcohol: boolean
-  stayDuration: number // in hours
-  joinTime: string
-  suggestions: string
-  bringingItems: string[]
-  joinedAt: Date
+export function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
-export interface Cost {
-  id: string
-  participantId: string
-  participantUsername: string
-  items: CostItem[]
-  total: number
-  addedAt: Date
+export function formatDateTime(date: Date): string {
+  return `${formatDate(date)} at ${formatTime(date)}`
 }
 
-export interface CostItem {
-  name: string
-  amount: number
-  sharedWith: string[] // participant IDs who consumed this
+export function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
 }
 
-export type Language = "en" | "de"
-export type Theme = "light" | "dark"
-
-// Add a more flexible type for Firebase documents
-export interface FirebaseMeetup {
-  id: string
-  title: string
-  description: string
-  location: string
-  date: any // Firebase Timestamp or Date
-  time: string
-  endDate?: any // Firebase Timestamp or Date
-  endTime?: string
-  possibleDates?: MeetupDate[]
-  dateAvailabilities?: DateAvailability[]
-  dateFinalized?: boolean // New field
-  finalizedAt?: any // Firebase Timestamp or Date
-  winningDateVotes?: number // New field
-  winningDateVoters?: string[] // New field
-  hostId: string
-  hostUsername: string
-  code: string
-  hasAlcohol: boolean
-  shoppingList?: ShoppingItem[]
-  itemSuggestions?: ItemSuggestion[]
-  participants?: Participant[]
-  costs?: Cost[]
-  createdAt: any // Firebase Timestamp or Date
-  [key: string]: any // Allow additional properties
+export function debounce<T extends unknown[]>(func: (...args: T) => void, wait: number): (...args: T) => void {
+  let timeout: NodeJS.Timeout | null = null
+  return (...args: T) => {
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }
 }
 
-// Add a helper type for meetup status
-export type MeetupStatus = "upcoming" | "inProgress" | "past"
-
-export interface MeetupDate {
-  id: string
-  date: Date
-  time: string
-  endTime?: string
-  description?: string
+export function throttle<T extends unknown[]>(func: (...args: T) => void, limit: number): (...args: T) => void {
+  let inThrottle: boolean
+  return (...args: T) => {
+    if (!inThrottle) {
+      func(...args)
+      inThrottle = true
+      setTimeout(() => (inThrottle = false), limit)
+    }
+  }
 }
 
-export interface DateAvailability {
-  participantId: string
-  username: string
-  dateId: string
-  available: boolean
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-export interface ItemSuggestion {
-  id: string
-  participantId: string
-  participantUsername: string
-  name: string
-  baseAmount: number
-  unit: string
-  category: "food" | "drink" | "alcohol" | "other"
-  perPerson: boolean
-  reason?: string
-  suggestedAt: Date
+export function truncate(str: string, length: number): string {
+  return str.length > length ? str.substring(0, length) + "..." : str
+}
+
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+export function randomChoice<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)]
+}
+
+export function groupBy<T, K extends keyof T>(array: T[], key: K): Record<string, T[]> {
+  return array.reduce(
+    (groups, item) => {
+      const group = String(item[key])
+      groups[group] = groups[group] || []
+      groups[group].push(item)
+      return groups
+    },
+    {} as Record<string, T[]>,
+  )
+}
+
+export function unique<T>(array: T[]): T[] {
+  return [...new Set(array)]
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export function formatCurrency(amount: number, currency = "EUR"): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(amount)
+}
+
+export function formatNumber(num: number): string {
+  return new Intl.NumberFormat().format(num)
+}
+
+export function parseJSON<T>(str: string, fallback: T): T {
+  try {
+    return JSON.parse(str)
+  } catch {
+    return fallback
+  }
+}
+
+export function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result = { ...obj }
+  keys.forEach((key) => delete result[key])
+  return result
+}
+
+export function pick<T extends Record<string, unknown>, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+  const result = {} as Pick<T, K>
+  keys.forEach((key) => {
+    if (key in obj) {
+      result[key] = obj[key]
+    }
+  })
+  return result
 }

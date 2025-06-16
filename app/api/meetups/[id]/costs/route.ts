@@ -3,15 +3,27 @@ import { db } from "@/lib/firebase"
 import { doc, updateDoc, arrayUnion } from "firebase/firestore"
 import { v4 as uuidv4 } from "uuid"
 
+interface CostItem {
+  name: string
+  amount: number
+  sharedWith: string[]
+}
+
+interface CostRequestBody {
+  participantId: string
+  participantUsername: string
+  items: CostItem[]
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const data = await request.json()
+    const data: CostRequestBody = await request.json()
 
     const cost = {
       id: uuidv4(),
       ...data,
-      total: data.items.reduce((sum: number, item: any) => sum + item.amount, 0),
+      total: data.items.reduce((sum: number, item: CostItem) => sum + item.amount, 0),
       addedAt: new Date(),
     }
 

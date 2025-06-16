@@ -94,7 +94,7 @@ export function DateAvailabilityForm({
           Select Your Available Dates
         </h4>
         <p className="date-availability-subtitle">
-          Choose which dates work for you. The host will see everyone's preferences.
+          Choose which dates work for you. The host will see everyone&apos;s preferences.
         </p>
       </div>
 

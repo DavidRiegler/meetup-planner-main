@@ -7,6 +7,7 @@ import { useToast } from "./toast"
 import { formatLocationDisplay } from "@/lib/maps-utils"
 import { AlertCircle, ExternalLink, MapPin } from "lucide-react"
 import { DateAvailabilityForm } from "./date-availability-form"
+import type { Meetup } from "@/lib/types"
 
 interface JoinMeetupFormProps {
   onBack: () => void
@@ -18,7 +19,7 @@ export function JoinMeetupForm({ onBack }: JoinMeetupFormProps) {
   const { showToast } = useToast()
 
   const [code, setCode] = useState("")
-  const [meetup, setMeetup] = useState<any>(null)
+  const [meetup, setMeetup] = useState<Meetup | null>(null)
   const [participantData, setParticipantData] = useState({
     isVegetarian: false,
     isVegan: false,

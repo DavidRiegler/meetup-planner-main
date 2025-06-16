@@ -1,5 +1,4 @@
 "use client"
-import { useIntl } from "./intl-provider"
 import type { MeetupDate, DateAvailability } from "@/lib/types"
 import { Calendar, Clock, Users, Check, X } from "lucide-react"
 import { useState } from "react"
@@ -26,7 +25,6 @@ export function DatePoll({
   winningDateVotes,
   onUpdate,
 }: DatePollProps) {
-  const { t } = useIntl()
   const { showToast } = useToast()
   const [finalizing, setFinalizing] = useState(false)
 

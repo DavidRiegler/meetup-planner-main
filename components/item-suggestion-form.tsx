@@ -12,6 +12,8 @@ interface ItemSuggestionFormProps {
   onSuggestionAdded: () => void
 }
 
+type ItemCategory = "food" | "drink" | "alcohol" | "other"
+
 export function ItemSuggestionForm({ meetupId, onSuggestionAdded }: ItemSuggestionFormProps) {
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -22,7 +24,7 @@ export function ItemSuggestionForm({ meetupId, onSuggestionAdded }: ItemSuggesti
     name: "",
     baseAmount: 1,
     unit: "",
-    category: "food" as const,
+    category: "food" as ItemCategory,
     perPerson: false,
     reason: "",
   })
@@ -125,7 +127,7 @@ export function ItemSuggestionForm({ meetupId, onSuggestionAdded }: ItemSuggesti
             <label className="form-label">Category</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as ItemCategory })}
               className="input select"
             >
               <option value="food">Food</option>

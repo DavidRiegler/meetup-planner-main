@@ -1,7 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore"
-import type { FirebaseMeetup, Meetup } from "@/lib/types"
+import type { FirebaseMeetup, Meetup, MeetupDate } from "@/lib/types"
+
+interface UpdateMeetupRequest {
+  title?: string
+  description?: string
+  location?: string
+  date?: string
+  time?: string
+  endDate?: string
+  endTime?: string
+  hasAlcohol?: boolean
+}
 
 // Update the GET handler to handle end date and time
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -19,31 +30,40 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const data = meetupSnap.data() as FirebaseMeetup
 
+    // Helper function to safely convert Firebase timestamps to dates
+    const convertToDate = (timestamp: unknown): Date => {
+      if (!timestamp) return new Date()
+      if (timestamp instanceof Date) return timestamp
+      if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp) {
+        return (timestamp as { toDate: () => Date }).toDate()
+      }
+      if (typeof timestamp === "string" || typeof timestamp === "number") {
+        return new Date(timestamp)
+      }
+      return new Date()
+    }
+
     const meetupData: Meetup = {
       id: meetupSnap.id,
       title: data.title || "",
       description: data.description || "",
       location: data.location || "",
-      date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
+      date: convertToDate(data.date),
       time: data.time || "",
-      endDate: data.endDate?.toDate ? data.endDate.toDate() : data.endDate ? new Date(data.endDate) : undefined,
+      endDate: data.endDate ? convertToDate(data.endDate) : undefined,
       endTime: data.endTime || undefined,
       possibleDates: data.possibleDates
-        ? data.possibleDates.map((d: any) => ({
+        ? data.possibleDates.map((d: MeetupDate) => ({
             ...d,
-            date: d.date?.toDate ? d.date.toDate() : new Date(d.date),
+            date: convertToDate(d.date),
           }))
         : undefined,
       dateAvailabilities: data.dateAvailabilities || [],
       dateFinalized: data.dateFinalized || false,
-      finalizedAt: data.finalizedAt?.toDate
-        ? data.finalizedAt.toDate()
-        : data.finalizedAt
-          ? new Date(data.finalizedAt)
-          : undefined,
+      finalizedAt: data.finalizedAt ? convertToDate(data.finalizedAt) : undefined,
       winningDateVotes: data.winningDateVotes || undefined,
       winningDateVoters: data.winningDateVoters || undefined,
-      usesDatePolling: data.usesDatePolling || false, // Add the new field
+      usesDatePolling: data.usesDatePolling || false,
       hostId: data.hostId || "",
       hostUsername: data.hostUsername || "",
       code: data.code || "",
@@ -52,7 +72,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       itemSuggestions: data.itemSuggestions || [],
       participants: data.participants || [],
       costs: data.costs || [],
-      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      createdAt: convertToDate(data.createdAt),
+      updatedAt: data.updatedAt ? convertToDate(data.updatedAt) : undefined,
     }
 
     return NextResponse.json(meetupData)
@@ -66,7 +87,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const id = params.id
-    const updateData = await request.json()
+    const updateData: UpdateMeetupRequest = await request.json()
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)
@@ -75,19 +96,41 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Meetup not found" }, { status: 404 })
     }
 
-    // Prepare update data
-    const updatePayload = {
-      ...updateData,
-      date: new Date(updateData.date),
+    // Prepare update data with proper Firebase types
+    const updatePayload: Partial<FirebaseMeetup> & { updatedAt: Date } = {
       updatedAt: new Date(),
+    }
+
+    // Only add fields that are being updated
+    if (updateData.title !== undefined) {
+      updatePayload.title = updateData.title
+    }
+    if (updateData.description !== undefined) {
+      updatePayload.description = updateData.description
+    }
+    if (updateData.location !== undefined) {
+      updatePayload.location = updateData.location
+    }
+    if (updateData.time !== undefined) {
+      updatePayload.time = updateData.time
+    }
+    if (updateData.endTime !== undefined) {
+      updatePayload.endTime = updateData.endTime
+    }
+    if (updateData.hasAlcohol !== undefined) {
+      updatePayload.hasAlcohol = updateData.hasAlcohol
+    }
+
+    if (updateData.date) {
+      updatePayload.date = new Date(updateData.date)
     }
 
     // Handle optional end date
     if (updateData.endDate) {
       updatePayload.endDate = new Date(updateData.endDate)
-    } else {
-      // If endDate is empty string or null, remove it from the document
-      updatePayload.endDate = null
+    } else if (updateData.endDate === "") {
+      // If endDate is empty string, remove it from the document
+      updatePayload.endDate = undefined
     }
 
     // Update the meetup

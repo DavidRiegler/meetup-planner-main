@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
+import type { Participant } from "@/lib/types"
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string; participantId: string } }) {
   try {
@@ -17,7 +18,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const participants = meetupData.participants || []
 
     // Remove the participant
-    const updatedParticipants = participants.filter((p: any) => p.id !== participantId)
+    const updatedParticipants = participants.filter((p: Participant) => p.id !== participantId)
 
     await updateDoc(meetupRef, {
       participants: updatedParticipants,

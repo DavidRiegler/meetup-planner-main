@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "./auth-provider"
 import { useIntl } from "./intl-provider"
 import { useToast } from "./toast"
@@ -20,13 +20,7 @@ export function MyMeetupsTab() {
   const [error, setError] = useState<string | null>(null)
   const [selectedMeetupId, setSelectedMeetupId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      fetchMeetups()
-    }
-  }, [user])
-
-  const fetchMeetups = async () => {
+  const fetchMeetups = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -55,7 +49,13 @@ export function MyMeetupsTab() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, showToast])
+
+  useEffect(() => {
+    if (user) {
+      fetchMeetups()
+    }
+  }, [user, fetchMeetups])
 
   const categorizedHostedMeetups = categorizeMeetups(hostedMeetups)
   const categorizedJoinedMeetups = categorizeMeetups(joinedMeetups)
@@ -228,8 +228,6 @@ function MeetupCard({
   onClick: () => void
   highlight?: boolean
 }) {
-  const { t } = useIntl()
-  const isMultiDay = meetup.endDate !== undefined
   const status = getMeetupStatus(meetup)
 
   return (
