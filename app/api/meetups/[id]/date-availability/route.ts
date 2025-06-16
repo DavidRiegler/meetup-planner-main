@@ -12,9 +12,9 @@ interface DateAvailabilityRequest {
   }>
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const { participantId, username, availabilities }: DateAvailabilityRequest = await request.json()
 
     const meetupRef = doc(db, "meetups", id)
