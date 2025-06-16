@@ -15,9 +15,12 @@ interface UpdateMeetupRequest {
 }
 
 // Update the GET handler to handle end date and time
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id
+    const { id } = await params
     console.log("Fetching meetup with ID:", id)
 
     const meetupRef = doc(db, "meetups", id)
@@ -84,9 +87,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // Update the PUT handler to handle end date and time
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id
+    const { id } = await params
     const updateData: UpdateMeetupRequest = await request.json()
 
     const meetupRef = doc(db, "meetups", id)
@@ -143,9 +149,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id
+    const { id } = await params
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)

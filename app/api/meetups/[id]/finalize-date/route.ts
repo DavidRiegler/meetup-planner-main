@@ -3,9 +3,16 @@ import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import type { DateAvailability, MeetupDate } from "@/lib/types"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+// Define the type for date votes
+interface DateVote {
+  date: MeetupDate;
+  votes: number;
+  voters: string[];
+}
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)
@@ -23,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Calculate votes for each date
-    const dateVotes = possibleDates.map((date: MeetupDate) => {
+    const dateVotes: DateVote[] = possibleDates.map((date: MeetupDate) => {
       const availabilities = dateAvailabilities.filter((a: DateAvailability) => a.dateId === date.id && a.available)
       return {
         date,
@@ -33,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     })
 
     // Find the date with the most votes
-    const winningDate = dateVotes.reduce((prev: { votes: number }, current: { votes: number }) => (current.votes > prev.votes ? current : prev))
+    const winningDate = dateVotes.reduce((prev: DateVote, current: DateVote) => (current.votes > prev.votes ? current : prev))
 
     if (winningDate.votes === 0) {
       return NextResponse.json({ error: "No votes received for any date option" }, { status: 400 })

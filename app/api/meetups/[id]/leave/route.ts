@@ -7,9 +7,13 @@ interface LeaveRequest {
   participantId: string
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id } = await params
     const { participantId }: LeaveRequest = await request.json()
 
     if (!participantId) {

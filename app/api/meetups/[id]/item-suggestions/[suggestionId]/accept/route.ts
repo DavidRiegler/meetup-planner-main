@@ -4,9 +4,13 @@ import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore"
 import { v4 as uuidv4 } from "uuid"
 import type { ItemSuggestion, ShoppingItem } from "@/lib/types"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string; suggestionId: string } }) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string; suggestionId: string }> }
+) {
   try {
-    const { id, suggestionId } = params
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id, suggestionId } = await params
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)

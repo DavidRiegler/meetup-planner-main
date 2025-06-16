@@ -3,9 +3,13 @@ import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import type { ItemSuggestion } from "@/lib/types"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string; suggestionId: string } }) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string; suggestionId: string }> }
+) {
   try {
-    const { id, suggestionId } = params
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id, suggestionId } = await params
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)

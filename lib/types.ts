@@ -1,7 +1,7 @@
 export interface User {
   id: string
   username: string
-  email: string
+  fullName?: string
   createdAt: Date
 }
 
@@ -131,3 +131,9 @@ export interface FirebaseMeetup {
 interface FirebaseTimestamp {
   toDate(): Date
 }
+
+export type Language = "en" | "de" 
+
+export type Theme = "light" | "dark" 
+
+export type MeetupStatus = "upcoming" | "inProgress" | "past"

@@ -2,10 +2,31 @@ import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs } from "firebase/firestore"
 import type { FirebaseMeetup, Meetup } from "@/lib/types"
+import type { Timestamp } from "firebase/firestore"
 
-export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
+const convertToDate = (
+  value: Timestamp | Date | string | number | { toDate: () => Date } | null | undefined
+): Date => {
+  if (value && typeof (value as { toDate: () => Date }).toDate === "function") {
+    return (value as { toDate: () => Date }).toDate()
+  }
+  if (value instanceof Date) {
+    return value
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    return new Date(value)
+  }
+  // fallback for null, undefined, or unexpected types
+  return new Date(0)
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ userId: string }> }
+) {
   try {
-    const userId = params.userId
+    // Await the params since it's now a Promise in newer Next.js versions
+    const { userId } = await params
     console.log("Fetching meetups for user:", userId)
 
     // Get hosted meetups
@@ -19,9 +40,9 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
         title: data.title || "",
         description: data.description || "",
         location: data.location || "",
-        date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
+        date: convertToDate(data.date),
         time: data.time || "",
-        endDate: data.endDate?.toDate ? data.endDate.toDate() : data.endDate ? new Date(data.endDate) : undefined,
+        endDate: data.endDate ? convertToDate(data.endDate) : undefined,
         endTime: data.endTime || undefined,
         hostId: data.hostId || "",
         hostUsername: data.hostUsername || "",
@@ -30,7 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
         shoppingList: data.shoppingList || [],
         participants: data.participants || [],
         costs: data.costs || [],
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        createdAt: convertToDate(data.createdAt),
       }
     })
 
@@ -47,9 +68,9 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
           title: data.title || "",
           description: data.description || "",
           location: data.location || "",
-          date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
+          date: convertToDate(data.date),
           time: data.time || "",
-          endDate: data.endDate?.toDate ? data.endDate.toDate() : data.endDate ? new Date(data.endDate) : undefined,
+          endDate: data.endDate ? convertToDate(data.endDate) : undefined,
           endTime: data.endTime || undefined,
           hostId: data.hostId || "",
           hostUsername: data.hostUsername || "",
@@ -58,7 +79,7 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
           shoppingList: data.shoppingList || [],
           participants: data.participants || [],
           costs: data.costs || [],
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+          createdAt: convertToDate(data.createdAt),
         }
       })
       .filter((meetup) => {

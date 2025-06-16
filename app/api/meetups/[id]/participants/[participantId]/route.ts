@@ -3,9 +3,13 @@ import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import type { Participant } from "@/lib/types"
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string; participantId: string } }) {
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string; participantId: string }> }
+) {
   try {
-    const { id, participantId } = params
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id, participantId } = await params
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)

@@ -3,9 +3,13 @@ import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore"
 import { v4 as uuidv4 } from "uuid"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = params.id
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id } = await params
     console.log("Joining meetup with ID:", id)
 
     const data = await request.json()

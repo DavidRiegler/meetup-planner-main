@@ -13,21 +13,25 @@ interface UpdateParticipantRequest {
   bringingItems?: string[]
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string; participantId: string } }) {
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string; participantId: string }> }
+) {
   try {
-    const { id, participantId } = params
+    // Await the params since they're now a Promise in newer Next.js versions
+    const { id, participantId } = await params
     const updateData: UpdateParticipantRequest = await request.json()
-
+    
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)
-
+    
     if (!meetupSnap.exists()) {
       return NextResponse.json({ error: "Meetup not found" }, { status: 404 })
     }
-
+    
     const meetupData = meetupSnap.data()
     const participants = meetupData.participants || []
-
+    
     // Find and update the participant
     const updatedParticipants = participants.map((p: Participant) => {
       if (p.participantId === participantId) {
@@ -39,11 +43,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
       return p
     })
-
+    
     await updateDoc(meetupRef, {
       participants: updatedParticipants,
     })
-
+    
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error updating participant:", error)
