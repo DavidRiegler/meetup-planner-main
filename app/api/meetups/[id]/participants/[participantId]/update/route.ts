@@ -1,11 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
+import type { Participant } from "@/lib/types"
+
+interface UpdateParticipantRequest {
+  isVegetarian?: boolean
+  isVegan?: boolean
+  drinksAlcohol?: boolean
+  stayDuration?: number
+  joinTime?: string
+  suggestions?: string
+  bringingItems?: string[]
+}
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string; participantId: string } }) {
   try {
     const { id, participantId } = params
-    const updateData = await request.json()
+    const updateData: UpdateParticipantRequest = await request.json()
 
     const meetupRef = doc(db, "meetups", id)
     const meetupSnap = await getDoc(meetupRef)
@@ -18,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const participants = meetupData.participants || []
 
     // Find and update the participant
-    const updatedParticipants = participants.map((p: any) => {
+    const updatedParticipants = participants.map((p: Participant) => {
       if (p.participantId === participantId) {
         return {
           ...p,
