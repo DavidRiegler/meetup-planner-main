@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs } from "firebase/firestore"
+import { parseDate, formatDateForAPI } from "@/lib/date-utils"
 
 // Update the GET handler to handle end date and time
 export async function GET(request: NextRequest) {
@@ -26,9 +27,9 @@ export async function GET(request: NextRequest) {
     const meetupData = {
       id: meetupDoc.id,
       ...data,
-      date: data.date.toDate().toISOString().split("T")[0],
-      endDate: data.endDate ? data.endDate.toDate().toISOString().split("T")[0] : null,
-      createdAt: data.createdAt.toDate(),
+      date: formatDateForAPI(parseDate(data.date)),
+      endDate: data.endDate ? formatDateForAPI(parseDate(data.endDate)) : null,
+      createdAt: formatDateForAPI(parseDate(data.createdAt))
     }
 
     return NextResponse.json(meetupData)
