@@ -22,13 +22,7 @@ interface CreateMeetupRequest {
     category: string
     perPerson?: boolean
   }>
-  possibleDates?: Array<{
-    id: string
-    date: Date
-    time: string
-    endTime?: string
-    description?: string
-  }>
+  possibleDates?: MeetupDate[] // Verwende hier das MeetupDate Interface
   usesDatePolling?: boolean
 }
 
@@ -50,13 +44,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
       date: new Date(data.date),
       endDate: data.endDate ? new Date(data.endDate) : null,
-      possibleDates: data.possibleDates
-        ? data.possibleDates.map((d: MeetupDate) => ({
-            ...d,
-            date: new Date(d.date),
-          }))
-        : [],
-      // Set initial polling state
+      possibleDates: data.possibleDates || [],
       usesDatePolling: data.usesDatePolling || false,
       dateFinalized: data.usesDatePolling ? false : true, // If using polling, not finalized yet
     }

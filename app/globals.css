@@ -371,6 +371,179 @@ body {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Header Styles */
+.header {
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  color: var(--foreground);
+}
+
+.header-btn:hover {
+  background: var(--accent);
+}
+
+.header-btn-logout {
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
+
+.header-btn-logout:hover {
+  background: var(--destructive);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .header-controls {
+    width: 100%;
+  }
+
+  .header-user {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  .header-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* Anpassung der bestehenden Mobile Styles */
+@media (max-width: 768px) {
+  .header.collapsed .header-content,
+  .header.collapsed .header-user,
+  .header.collapsed .header-actions {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .header.collapsed .header-btn {
+    flex: 0;
+    width: auto;
+  }
+}
+
+/* Header Button Styles */
+.header-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  color: var(--foreground); /* Fügt die Standard-Textfarbe hinzu */
+}
+
+/* Nur der Logout-Button behält seine spezielle Farbe */
+.header-btn-logout {
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
+
+.header-btn-logout:hover {
+  background: var(--destructive);
+  color: white;
+}
+
+/* Mobile Header Styles */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .header-controls {
+    width: 100%;
+  }
+
+  .header-user {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 380px) {
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .header-btn {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 0.5rem;
@@ -2275,4 +2448,132 @@ body {
 
 .date-poll-finalize .button {
   min-width: 200px;
+}
+
+/* Meetup Header Styles */
+.meetup-header {
+  margin-bottom: 2rem;
+}
+
+.meetup-header-main {
+  display: flex;
+  align-items: center; /* Geändert von flex-start zu center */
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.meetup-title-group {
+  flex: 1;
+  min-width: 0; /* Verhindert Overflow auf kleinen Screens */
+}
+
+.meetup-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.meetup-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Media Queries für responsive Design */
+@media (min-width: 769px) {
+  .meetup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .meetup-header-main {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .meetup-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .meetup-badges {
+    margin-top: 0;
+  }
+
+  .button-text {
+    display: inline;
+  }
+}
+
+@media (max-width: 768px) {
+  .meetup-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .meetup-header-main {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .meetup-header-actions {
+    width: 100%;
+  }
+
+  .meetup-header-actions .button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .button-text {
+    display: none;
+  }
+}
+
+/* Small mobile optimizations */
+@media (max-width: 480px) {
+  .meetup-header {
+    margin-bottom: 1rem;
+  }
+
+  .meetup-badges {
+    margin-top: 0.25rem;
+  }
+}
+
+/* Code Badge Styles */
+.code-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.copy-button:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+/* Touch-optimierte Styles */
+@media (max-width: 768px) {
+  .copy-button {
+    padding: 0.5rem;
+  }
 }

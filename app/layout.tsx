@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
 import { IntlProvider } from "@/components/intl-provider"
 import { ToastProvider } from "@/components/toast"
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,10 +26,13 @@ export default function RootLayout({
         <ThemeProvider>
           <IntlProvider>
             <AuthProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
             </AuthProvider>
           </IntlProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

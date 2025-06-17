@@ -3,6 +3,7 @@ import type { MeetupDate, DateAvailability } from "@/lib/types"
 import { Calendar, Clock, Users, Check, X } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "./toast"
+import { formatDate } from "@/lib/utils"
 
 interface DatePollProps {
   possibleDates: MeetupDate[]
@@ -28,7 +29,6 @@ export function DatePoll({
   const { showToast } = useToast()
   const [finalizing, setFinalizing] = useState(false)
 
-  // Add the finalize date function
   const handleFinalizeDate = async () => {
     if (!meetupId || !isHost) return
 
@@ -48,7 +48,7 @@ export function DatePoll({
       showToast({
         type: "success",
         title: "Date finalized",
-        message: `${result.winningDate.date} has been set as the meetup date with ${result.votes} votes`,
+        message: `${formatDate(result.winningDate.date)} has been set as the meetup date with ${result.votes} votes`,
       })
 
       if (onUpdate) {
@@ -90,7 +90,7 @@ export function DatePoll({
     if (showResults) {
       const statsA = getDateStats(a.id)
       const statsB = getDateStats(b.id)
-      return statsB.percentage - statsA.percentage // Sort by availability percentage
+      return statsB.percentage - statsA.percentage
     }
     return new Date(a.date).getTime() - new Date(b.date).getTime()
   })
@@ -129,6 +129,9 @@ export function DatePoll({
 
       <div className="date-poll-options">
         {sortedDates.map((date) => {
+          // Debug: log the actual date value to console
+          console.log('Date value:', date.date, 'Type:', typeof date.date);
+          
           const stats = getDateStats(date.id)
           const isWinner =
             showResults &&
@@ -147,6 +150,7 @@ export function DatePoll({
                       weekday: "short",
                       month: "short",
                       day: "numeric",
+                      year: "numeric",
                     })}
                   </div>
                   <div className="date-poll-time">

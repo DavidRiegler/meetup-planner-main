@@ -3,7 +3,6 @@
 import { useAuth } from "./auth-provider"
 import { useTheme } from "./theme-provider"
 import { useIntl } from "./intl-provider"
-import { Sun, Moon, Globe } from "lucide-react"
 
 export function Header() {
   const { user, logout } = useAuth()
@@ -14,33 +13,39 @@ export function Header() {
     <header className="header">
       <div className="container">
         <div className="header-content">
-          <h1 className="text-xl font-bold">Meetup Planner</h1>
+          <h1 className="header-title">Meetup Planner</h1>
 
           <div className="header-controls">
-            <button
-              onClick={() => setLanguage(language === "en" ? "de" : "en")}
-              className="button button-outline"
-              title="Change Language"
-            >
-              <Globe size={16} />
-              {language.toUpperCase()}
-            </button>
-
-            <button
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className="button button-outline"
-              title="Toggle Theme"
-            >
-              {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
-            </button>
-
             {user && (
-              <>
-                <span className="text-sm">@{user.username}</span>
-                <button onClick={logout} className="button button-secondary">
-                  {t("logout")}
-                </button>
-              </>
+              <div className="header-user">
+                <span className="header-username">@{user.username}</span>
+                
+                <div className="header-actions">
+                  <button 
+                    className="header-btn"
+                    onClick={() => setLanguage(language === "en" ? "de" : "en")}
+                    title={t("change_language")}
+                  >
+                    {language.toUpperCase()}
+                  </button>
+                  
+                  <button 
+                    className="header-btn"
+                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                    title={t("toggle_theme")}
+                  >
+                    {theme === "light" ? "🌙" : "☀️"}
+                  </button>
+                  
+                  <button 
+                    className="header-btn header-btn-logout"
+                    onClick={logout}
+                    title={t("logout")}
+                  >
+                    {t("logout")}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

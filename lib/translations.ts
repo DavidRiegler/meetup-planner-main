@@ -610,6 +610,14 @@ export const translations = {
     // Add missing keys
     note: "Hinweis",
   },
+  code_copied: {
+    en: "Code copied to clipboard!",
+    de: "Code in die Zwischenablage kopiert!"
+  },
+  copy_code: {
+    en: "Copy meetup code",
+    de: "Meetup-Code kopieren"
+  },
 }
 
 export type TranslationKey = keyof typeof translations.en

@@ -9,23 +9,94 @@ export function generateId(): string {
   return Math.random().toString(36).substr(2, 9)
 }
 
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+export function formatDate(dateString: string | Date): string {
+  try {
+    let date: Date;
+    
+    if (typeof dateString === 'string') {
+      // Handle different date string formats
+      if (dateString.includes('T')) {
+        // ISO format: 2024-01-15T10:00:00.000Z
+        date = new Date(dateString);
+      } else if (dateString.includes('/')) {
+        // Format: YYYY/MM/DD or MM/DD/YYYY
+        date = new Date(dateString);
+      } else if (dateString.includes('-')) {
+        // Format: YYYY-MM-DD
+        date = new Date(dateString + 'T00:00:00');
+      } else {
+        // Try direct parsing
+        date = new Date(dateString);
+      }
+    } else {
+      date = dateString;
+    }
+
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date:', dateString);
+      return String(dateString); // Return the original string if parsing fails
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error, dateString);
+    return String(dateString); // Return the original string if there's an error
+  }
 }
 
-export function formatTime(date: Date): string {
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+export function formatTime(timeString: string): string {
+  // If it's already in HH:MM format, return as is
+  if (typeof timeString === 'string' && /^\d{1,2}:\d{2}$/.test(timeString)) {
+    return timeString;
+  }
+  
+  // Otherwise try to parse as date
+  try {
+    const dateObj = new Date(timeString);
+    
+    if (isNaN(dateObj.getTime())) {
+      console.error('Invalid time:', timeString);
+      return 'Invalid Time';
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(dateObj);
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'Invalid Time';
+  }
 }
 
-export function formatDateTime(date: Date): string {
-  return `${formatDate(date)} at ${formatTime(date)}`
+export function formatDateTime(dateString: string | Date): string {
+  try {
+    const date = typeof dateString === 'string' 
+      ? new Date(dateString)
+      : dateString;
+
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date:', dateString);
+      return 'Invalid Date';
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date time:', error);
+    return 'Invalid Date';
+  }
 }
 
 export function isValidEmail(email: string): boolean {

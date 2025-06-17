@@ -48,11 +48,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Update the meetup with the winning date
     const updateData = {
-      date: winningDate.date.date,
+      date: winningDate.date.date, // Bereits als String
       time: winningDate.date.time,
       endTime: winningDate.date.endTime || null,
       dateFinalized: true,
-      finalizedAt: new Date(),
+      finalizedAt: new Date().toISOString(),
       winningDateVotes: winningDate.votes,
       winningDateVoters: winningDate.voters,
     }

@@ -22,6 +22,7 @@ import {
   Settings,
   ExternalLink,
   Vote,
+  Copy,
 } from "lucide-react"
 import { Modal } from "./modal"
 import { ParticipantEditModal } from "./participant-edit-modal"
@@ -465,32 +466,54 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
   return (
     <ErrorBoundary>
       <div className="container">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="meetup-header">
+          <div className="meetup-header-main">
             <button onClick={onBack} className="button button-outline">
               <ArrowLeft size={16} />
               Back
             </button>
-            <h1 className="text-2xl font-bold">{meetup.title}</h1>
-            <span className="badge badge-primary">{meetup.code}</span>
-            {meetup.usesDatePolling && !meetup.dateFinalized && (
-              <span className="badge badge-warning">
-                <Vote size={12} />
-                Date Polling
-              </span>
-            )}
+
+            <div className="meetup-title-group">
+              <h1 className="text-2xl font-bold">{meetup.title}</h1>
+              <div className="meetup-badges">
+                <div className="code-badge">
+                  <span className="badge badge-primary">{meetup.code}</span>
+                  <button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(meetup.code)
+                      showToast({
+                        type: "success",
+                        title: t("code_copied"),
+                        message: t("code_copied"),
+                        duration: 2000,
+                      })
+                    }}
+                    className="copy-button"
+                    title={t("copy_code")}
+                  >
+                    <Copy size={14} />
+                  </button>
+                </div>
+                {meetup.usesDatePolling && !meetup.dateFinalized && (
+                  <span className="badge badge-warning">
+                    <Vote size={12} />
+                    Date Polling
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="meetup-header-actions">
             {isHost && (
               <>
                 <button onClick={() => setShowEditMeetup(true)} className="button button-outline">
                   <Edit size={16} />
-                  Edit
+                  <span className="button-text">Edit</span>
                 </button>
                 <button onClick={() => setShowDeleteConfirm(true)} className="button button-destructive">
                   <Trash2 size={16} />
-                  Delete
+                  <span className="button-text">Delete</span>
                 </button>
               </>
             )}
@@ -499,11 +522,11 @@ export function MeetupDetails({ meetupId, onBack }: MeetupDetailsProps) {
               <>
                 <button onClick={() => setShowEditParticipation(true)} className="button button-outline">
                   <Edit3 size={16} />
-                  Edit Participation
+                  <span className="button-text">Edit</span>
                 </button>
                 <button onClick={() => setShowLeaveConfirm(true)} className="button button-destructive">
                   <UserX size={16} />
-                  Leave Meetup
+                  <span className="button-text">Leave</span>
                 </button>
               </>
             )}

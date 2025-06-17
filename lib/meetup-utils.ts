@@ -25,78 +25,56 @@ export function getMeetupStatus(meetup: Meetup): MeetupStatus {
 }
 
 export function formatDateRange(meetup: Meetup): string {
-  const startDate = new Date(meetup.date)
-  const hasEndDate = meetup.endDate !== undefined
+  try {
+    const startDate = new Date(meetup.date);
+    const endDate = meetup.endDate ? new Date(meetup.endDate) : null;
 
-  if (!hasEndDate) {
-    return startDate.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+    if (endDate) {
+      return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    }
+    return formatDate(startDate);
+  } catch (error) {
+    console.error('Error formatting date range:', error);
+    return 'Date to be set';
   }
-
-  const endDate = new Date(meetup.endDate!)
-
-  // Same day
-  if (startDate.toDateString() === endDate.toDateString()) {
-    return startDate.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
-
-  // Same month
-  if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
-    return `${startDate.getDate()} - ${endDate.getDate()} ${startDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
-  }
-
-  // Different months
-  return `${startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
 }
 
 export function formatTimeRange(meetup: Meetup): string {
-  if (!meetup.endTime) {
-    return meetup.time
-  }
+  try {
+    const startTime = meetup.time;
+    const endTime = meetup.endTime;
 
-  return `${meetup.time} - ${meetup.endTime}`
+    if (endTime) {
+      return `${startTime} - ${endTime}`;
+    }
+    return startTime;
+  } catch (error) {
+    console.error('Error formatting time range:', error);
+    return 'Time to be set';
+  }
 }
 
-// Add a new utility for consistent date display
-export function formatMeetupDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
+// Utility for consistent date display
+export function formatMeetupDate(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+  
+  return dateObj.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  })
+  });
 }
 
-// Add utility for consistent time display
-export function formatMeetupTime(time: string, endTime?: string): string {
-  if (!endTime) {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    })
-  }
-
-  const startFormatted = new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-
-  const endFormatted = new Date(`2000-01-01T${endTime}`).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-
-  return `${startFormatted} - ${endFormatted}`
+// Utility for consistent date display (short format)
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 }

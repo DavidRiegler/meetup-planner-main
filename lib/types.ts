@@ -46,7 +46,7 @@ export interface Participant {
 
 export interface MeetupDate {
   id: string
-  date: Date
+  date: string 
   time: string
   endTime?: string
   description?: string
@@ -105,9 +105,9 @@ export interface FirebaseMeetup {
   title: string
   description: string
   location: string
-  date: FirebaseTimestamp | Date
+  date: string 
   time: string
-  endDate?: FirebaseTimestamp | Date | null
+  endDate?: string | null 
   endTime?: string
   hostId: string
   hostUsername: string
@@ -116,19 +116,20 @@ export interface FirebaseMeetup {
   shoppingList: ShoppingItem[]
   participants: Participant[]
   costs: Cost[]
-  createdAt: FirebaseTimestamp | Date
-  updatedAt?: FirebaseTimestamp | Date
+  createdAt: string
+  updatedAt?: string 
   possibleDates?: MeetupDate[]
   dateAvailabilities?: DateAvailability[]
   itemSuggestions?: ItemSuggestion[]
   usesDatePolling?: boolean
   dateFinalized?: boolean
-  finalizedAt?: FirebaseTimestamp | Date
+  finalizedAt?: string 
   winningDateVotes?: number
   winningDateVoters?: string[]
 }
 
-interface FirebaseTimestamp {
+// Exportiere FirebaseTimestamp, da es möglicherweise in anderen Dateien benötigt wird
+export interface FirebaseTimestamp {
   toDate(): Date
 }
 

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/firebase"
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore"
-import type { FirebaseMeetup, Meetup, MeetupDate } from "@/lib/types"
+import type { FirebaseMeetup, Meetup } from "@/lib/types"
 
 interface UpdateMeetupRequest {
   title?: string
@@ -51,16 +51,11 @@ export async function GET(
       title: data.title || "",
       description: data.description || "",
       location: data.location || "",
-      date: convertToDate(data.date),
+      date: convertToDate(data.date), // Convert string to Date
       time: data.time || "",
       endDate: data.endDate ? convertToDate(data.endDate) : undefined,
       endTime: data.endTime || undefined,
-      possibleDates: data.possibleDates
-        ? data.possibleDates.map((d: MeetupDate) => ({
-            ...d,
-            date: convertToDate(d.date),
-          }))
-        : undefined,
+      possibleDates: data.possibleDates || [],
       dateAvailabilities: data.dateAvailabilities || [],
       dateFinalized: data.dateFinalized || false,
       finalizedAt: data.finalizedAt ? convertToDate(data.finalizedAt) : undefined,
@@ -103,8 +98,8 @@ export async function PUT(
     }
 
     // Prepare update data with proper Firebase types
-    const updatePayload: Partial<FirebaseMeetup> & { updatedAt: Date } = {
-      updatedAt: new Date(),
+    const updatePayload: Partial<FirebaseMeetup> & { updatedAt: string } = {
+      updatedAt: new Date().toISOString(),
     }
 
     // Only add fields that are being updated
@@ -128,15 +123,14 @@ export async function PUT(
     }
 
     if (updateData.date) {
-      updatePayload.date = new Date(updateData.date)
+      updatePayload.date = updateData.date // Direkt als String speichern
     }
 
     // Handle optional end date
     if (updateData.endDate) {
-      updatePayload.endDate = new Date(updateData.endDate)
+      updatePayload.endDate = updateData.endDate // Direkt als String speichern
     } else if (updateData.endDate === "") {
-      // If endDate is empty string, remove it from the document
-      updatePayload.endDate = undefined
+      updatePayload.endDate = null
     }
 
     // Update the meetup
